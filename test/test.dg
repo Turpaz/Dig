@@ -1,0 +1,17 @@
+import math;
+
+fun main()
+{
+	i32 a = 12;
+	f32 b = -43.5 * 0b0010 + 0xff;
+	
+	if a > 6
+	{
+		for i < 5
+		{
+			a += b;
+		}
+	}
+
+	print("a = ", a);
+}
