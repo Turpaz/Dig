@@ -30,7 +30,7 @@ private:
 	Token parse_string();
 	void increment();
 	void skip_blank();
-	void skip_comment();
+	
 	string account_special_characters(const string& og);
 
 	inline char c() const { return this->src[this->i]; }

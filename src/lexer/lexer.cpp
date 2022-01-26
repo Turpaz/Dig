@@ -13,7 +13,6 @@ Token Lexer::next()
 	while (c() != '\0')
 	{
 		skip_blank();
-		skip_comment();
 
 		if ( isalpha(c()) || c() == '_') /* if c is in the alphabet or its a _ */
 			return parse_alpha();
@@ -259,28 +258,6 @@ string Lexer::account_special_characters(const string& og)
 
 	s.shrink_to_fit();
 	return s;
-}
-
-void Lexer::skip_comment()
-{
-	// TODO: account to a situation of a whitespace then a comment then more whitespace (i.e "  /* cmnt*/  // cmnt")
-	if (c() == '/' && c(i+1) == '/')
-	{
-		while (c() != '\n' && c() != '\0')
-		{
-			increment();
-		}
-		increment();increment();
-	}
-
-	if (c() == '/' && c(i+1) == '*')
-	{
-		while ( !(c() == '*' && c(i+1) == '/') )
-		{
-			increment();
-		}
-		increment();increment();
-	}
 }
 
 void Lexer::error(const char* format, ...)
