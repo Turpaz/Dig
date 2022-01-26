@@ -2,8 +2,8 @@ import math;
 
 fun main()
 {
-	i32 a = 12;
-	f32 b = -43.5 * 0b0010 + 0xff;
+	int a = 12;
+	float b = -43.5 * 0b0010 + 0xff;
 	
 	if a > 6
 	{

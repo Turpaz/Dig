@@ -25,7 +25,7 @@ Token Lexer::next()
 			return parse_string();
 		
 		// TODO: add parse_operator() function
-		// TODO: add more operators and separators
+		// TODO: add more operators
 		switch (c())
 		{
 		case '(':
@@ -42,6 +42,16 @@ Token Lexer::next()
 			increment(); return Token(toktype::KEYWORD, (unsigned)operators::SEMI, this->i);
 		case '+':
 			increment(); return Token(toktype::KEYWORD, (unsigned)operators::PLUS, this->i);
+		case '-':
+			increment(); return Token(toktype::KEYWORD, (unsigned)operators::MINUS, this->i);
+		case '*':
+			increment(); return Token(toktype::KEYWORD, (unsigned)operators::MUL, this->i);
+		case '/':
+			increment(); return Token(toktype::KEYWORD, (unsigned)operators::DIV, this->i);
+		case '>':
+			increment(); return Token(toktype::KEYWORD, (unsigned)operators::GT, this->i);
+		case '<':
+			increment(); return Token(toktype::KEYWORD, (unsigned)operators::LT, this->i);
 		case '\0':
 			break;
 		default:

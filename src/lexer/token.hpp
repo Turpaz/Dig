@@ -25,11 +25,11 @@ public:
 	void print()
 	{
 		if (type == toktype::IDENTIFIER || type == toktype::STRING)
-			printf("(\"%s\" : %s) at %zu\n", str, getStrType(), position);
+			printf("(\"%s\" : %s) at %zu\n", str.c_str(), type == toktype::STRING ? "STRING" : "IDENTIFIER", position);
 		else if (type == toktype::NUM)
-			printf("(%Lf : %s) at %zu\n", num, getStrType(), position);
+			printf("(%Lf : %s) at %zu\n", num, "NUM", position);
 		else if (type == toktype::KEYWORD)
-			printf("(%u : %s) at %zu\n", keyword, getStrType(), position);
+			printf("(%s : %s) at %zu\n", getStringFromId(keyword).c_str(), "KEYWORD", position);
 		else
 			printf("(\"\" : %s) at %zu\n", getStrType(), position);
 	}

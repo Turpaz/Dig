@@ -56,5 +56,6 @@ enum class operators : unsigned
 };
 
 unsigned getKeywordOrVartypeFromString(string s);
+string getStringFromId(unsigned i);
 
 #endif // GRAMMAR_HPP

@@ -18,13 +18,18 @@ int main(int argc, char** argv)
 	string path = "../test/test.dg"; // FIXME: 2 lines up
 	string src = getfile(path);
 
-	printf("Starting Compilation Procces for %s.\n", path.data());
-
 	// TODO: Preproccesing
 
 	Lexer lexer(src, path);
 	//Parser parser;
 	//Transpiler transpiler;
+
+	Token tok;
+	while ((tok = lexer.next()).type != toktype::TOK_EOF)
+	{
+		tok.print();
+	}
+	
 
 	return 0;
 }
