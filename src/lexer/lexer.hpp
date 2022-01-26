@@ -31,6 +31,7 @@ private:
 	void increment();
 	void skip_blank();
 	void skip_comment();
+	string account_special_characters(const string& og);
 
 	inline char c() const { return this->src[this->i]; }
 	inline char c(size_t i) const { return this->src[i]; }

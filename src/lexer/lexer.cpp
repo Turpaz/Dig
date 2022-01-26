@@ -93,44 +93,14 @@ Token Lexer::parse_digit()
 	{
 		increment();
 
-		while (c() != '\'')
+		while (c() != '\'' || (c() == '\'' && c(i-1) == '\\' && c(i-2) != '\\'))
 		{
 			v += c();
 			increment();
 		}
 		
-		if (v[0] == '\\' && v.size() == 2)
-		{
-			switch (v[1])
-			{
-			case 'n':
-				v = "\n"; break;
-			case 't':
-				v = "\t"; break;
-			case 'v':
-				v = "\v"; break;
-			case 'b':
-				v = "\b"; break;
-			case 'r':
-				v = "\r"; break;
-			case 'f':
-				v = "\f"; break;
-			case 'a':
-				v = "\a"; break;
-			case '\\':
-				v = "\\"; break;
-			case '?':
-				v = "\?"; break;
-			case '\'':
-				v = "\'"; break;
-			case '\"':
-				v = "\""; break;
-			case '0':
-				v = "\0"; break;
-			default:
-				break;
-			}
-		}
+		v = account_special_characters(v);
+		
 		if (v.size() > 1) error(ERROR_CHAR_TOO_LONG);
 
 		number = v[0];
@@ -206,7 +176,7 @@ Token Lexer::parse_string()
 
 	increment();
 
-	while (c() != '"' || (c() == '"' && c(i-1) == '\\'))
+	while (c() != '"' || (c() == '"' && c(i-1) == '\\') && c(i-2) != '\\')
 	{
 		if (c() == '\0')
 			error(firstQuotePos, ERROR_NO_MATCHING_QUOTE);
@@ -217,11 +187,8 @@ Token Lexer::parse_string()
 
 	increment();
 	
-	/* TODO: account for special characters, currently "ab\ncd" will take the \n part literally ("ab\\ncd").
-	It should understand it and translate is to:
-	"ab
-	cd"
-	*/
+	v = account_special_characters(v);
+
 	return Token(toktype::STRING, v, firstQuotePos);
 }
 
@@ -239,6 +206,59 @@ void Lexer::skip_blank()
 	{
 		increment();
 	}
+}
+
+string Lexer::account_special_characters(const string& og)
+{
+	string s = "";
+	s.reserve(og.size());
+	for (size_t i=0; i<og.size(); i++)
+	{
+		if (og[i] == '\\')
+		{
+			char single_char = '\\';
+			switch (og[i+1])
+			{
+			case 'n':
+				single_char = '\n'; break;
+			case 't':
+				single_char = '\t'; break;
+			case 'v':
+				single_char = '\v'; break;
+			case 'b':
+				single_char = '\b'; break;
+			case 'r':
+				single_char = '\r'; break;
+			case 'f':
+				single_char = '\f'; break;
+			case 'a':
+				single_char = '\a'; break;
+			case '\\':
+				single_char = '\\'; break;
+			case '?':
+				single_char = '\?'; break;
+			case '\'':
+				single_char = '\''; break;
+			case '\"':
+				single_char = '\"'; break;
+			case '0':
+				single_char = '\0'; break;
+			default:
+				break;
+			}
+			
+			s += single_char;
+			if (single_char != '\\')
+				i++;
+		}
+		else
+		{
+			s += og[i];
+		}
+	}
+
+	s.shrink_to_fit();
+	return s;
 }
 
 void Lexer::skip_comment()
