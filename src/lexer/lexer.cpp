@@ -52,6 +52,8 @@ Token Lexer::next()
 			increment(); return Token(toktype::KEYWORD, (unsigned)operators::GT, this->i);
 		case '<':
 			increment(); return Token(toktype::KEYWORD, (unsigned)operators::LT, this->i);
+		case ',':
+			increment(); return Token(toktype::KEYWORD, (unsigned)operators::COMMA, this->i);
 		case '\0':
 			break;
 		default:

@@ -31,27 +31,9 @@ public:
 		else if (type == toktype::KEYWORD)
 			printf("(%s : %s) at %zu\n", getStringFromId(keyword).c_str(), "KEYWORD", position);
 		else
-			printf("(\"\" : %s) at %zu\n", getStrType(), position);
+			printf("(\"\" : %s) at %zu\n", type == toktype::TOK_EOF ? "EOF" : "ERROR_TYPE", position);
 	}
 private:
-	inline const char* getStrType()
-	{
-		switch (type)
-		{
-			case toktype::IDENTIFIER:
-				return "IDENTIFIER";
-			case toktype::KEYWORD:
-				return "KEYWORD";
-			case toktype::NUM:
-				return "NUM";
-			case toktype::STRING:
-				return "STRING";
-			case toktype::TOK_EOF:
-				return "EOF";
-			default:
-				return "ERROR_TYPE";
-		}
-	}
 };
 
 #endif // LEXER_TOKEN_HPP
