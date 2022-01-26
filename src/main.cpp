@@ -1,6 +1,7 @@
 #include "lexer/lexer.hpp"
 #include "parser/parser.hpp"
 #include "transpiler/transpiler.hpp"
+#include "preprocessor/preprocessor.hpp"
 
 #include <string>
 #include <iostream>
@@ -15,10 +16,11 @@ int main(int argc, char** argv)
 {
 	// TODO: Bother with command line arguments and make the program act as intended
 
-	string path = "../test/test.dg"; // FIXME: 2 lines up
+	string path = "../test/test.dg"; // FIXME: look 2 lines up this is only temporary
 	string src = getfile(path);
 
-	// TODO: Preproccesing
+	// Preprocess
+	preprocess(src);
 
 	Lexer lexer(src, path);
 	//Parser parser;
