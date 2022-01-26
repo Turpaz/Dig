@@ -86,7 +86,7 @@ Token Lexer::parse_digit()
 {
 	size_t digitBegin = i;
 	string v = "";
-	long double number = 0;
+	double number = 0;
 	char mode = 0; // 0 = decimal, 1 = hexadecimal, 2 = binary, 3 = octal
 
 	if (c() == '\'')
@@ -170,7 +170,7 @@ Token Lexer::parse_digit()
 			v += '0';
 
 		if (mode == 0){
-			if (has_dot) 	number = std::stold(v);
+			if (has_dot) 	number = std::stod(v);
 			else 			number = std::stoull(v);}
 		else if (mode == 1)
 			number = std::stoull(v, NULL, 16);
