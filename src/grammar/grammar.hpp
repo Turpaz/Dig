@@ -55,6 +55,11 @@ enum class operators : unsigned
 	GETTING_COUNT_IGNORE_THIS
 };
 
+// tools to differentiate between a keyword, a vartype and an operator
+#define FIRST_KEYWORD_ID static_cast<unsigned>(keywords::SETTING_START_VALUE_IGNORE_THIS + 1)
+#define FIRST_VARTYPE_ID static_cast<unsigned>(vartypes::SETTING_START_VALUE_IGNORE_THIS + 1)
+#define FIRST_OPERATOR_ID static_cast<unsigned>(operators::SETTING_START_VALUE_IGNORE_THIS + 1)
+
 unsigned getKeywordOrVartypeFromString(string s);
 string getStringFromId(unsigned i);
 
