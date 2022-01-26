@@ -5,6 +5,12 @@ fun main()
 	int a = 12;
 	float b = -43.5 * 0b0010 + 0xff;
 	
+	// Comment!
+
+	/*
+		Another Comment!
+	*/
+
 	if a > 6
 	{
 		for i < 5
