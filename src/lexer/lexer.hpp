@@ -1,11 +1,16 @@
-#ifndef LEXER_HPP
-#define LEXER_HPP
+#ifndef LEXER_LEXER_HPP
+#define LEXER_LEXER_HPP
 
 #include <string>
 #include <regex>
+#include <stdarg.h>
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
 #include "token.hpp"
+#include "../macros.hpp"
+#include "../grammar/grammar.hpp"
 
 using std::string;
 
@@ -13,13 +18,25 @@ class Lexer
 {
 private:
 	string src;
+	string path;
 	size_t size;
 	size_t i;
 public:
-	Lexer(string src);
+	Lexer(string src, string path);
 	Token next();
 private:
+	Token parse_alpha();
+	Token parse_digit();
+	Token parse_string();
+	void increment();
+	void skip_blank();
+	void skip_comment();
 
+	inline char c() const { return this->src[this->i]; }
+	inline char c(size_t i) const { return this->src[i]; }
+
+	void error(const char* format, ...);
+	void error(size_t at, const char* format, ...);
 };
 
-#endif
+#endif // LEXER_LEXER_HPP

@@ -1,33 +1,57 @@
-#ifndef TOKEN_HPP
-#define TOKEN_HPP
+#ifndef LEXER_TOKEN_HPP
+#define LEXER_TOKEN_HPP
 
 #include <string>
 #include <cstdint>
+#include <stdio.h>
+#include "../grammar/grammar.hpp"
 
 using std::string;
 
-enum class toktype : char;
-
-struct Token
+class Token
 {
-	union { string str; long double num; unsigned keyword; };
+public:
 	toktype type;
+	string str; // Sometimes the value of the token
+	union { long double num; unsigned keyword/* A keyword or an operator */; }; // Sometimes the value of the token
 	size_t position;
+public:
+	Token(toktype type, string str, size_t position) : type(type), str(str), position(position) {}
+	Token(toktype type, long double num, size_t position) : type(type), num(num), position(position) {}
+	Token(toktype type, unsigned keyword, size_t position) : type(type), keyword(keyword), position(position) {}
+	Token() : type(toktype::TOK_EOF), str(""), num(0), position(-1) {}
+	Token(const Token& other) : type(other.type), str(other.str), num(other.num), position(other.position) {}
+
+	void print()
+	{
+		if (type == toktype::IDENTIFIER || type == toktype::STRING)
+			printf("(\"%s\" : %s) at %zu\n", str, getStrType(), position);
+		else if (type == toktype::NUM)
+			printf("(%Lf : %s) at %zu\n", num, getStrType(), position);
+		else if (type == toktype::KEYWORD)
+			printf("(%u : %s) at %zu\n", keyword, getStrType(), position);
+		else
+			printf("(\"\" : %s) at %zu\n", getStrType(), position);
+	}
+private:
+	inline const char* getStrType()
+	{
+		switch (type)
+		{
+			case toktype::IDENTIFIER:
+				return "IDENTIFIER";
+			case toktype::KEYWORD:
+				return "KEYWORD";
+			case toktype::NUM:
+				return "NUM";
+			case toktype::STRING:
+				return "STRING";
+			case toktype::TOK_EOF:
+				return "EOF";
+			default:
+				return "ERROR_TYPE";
+		}
+	}
 };
 
-enum class toktype : char
-{
-	KEYWORD,
-	VARTYPE,
-
-	OPERATOR,
-	SEPARATOR,
-
-	IDENTIFIER,
-	NUM,
-	STRING,
-
-	TOK_EOF,
-};
-
-#endif
+#endif // LEXER_TOKEN_HPP

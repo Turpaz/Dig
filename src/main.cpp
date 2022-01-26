@@ -22,7 +22,7 @@ int main(int argc, char** argv)
 
 	// TODO: Preproccesing
 
-	Lexer lexer(src);
+	Lexer lexer(src, path);
 	//Parser parser;
 	//Transpiler transpiler;
 
