@@ -24,7 +24,7 @@ int main(int argc, char** argv)
 	bool dont_compile = false;
 
 	//  -----=+*/ PARSE COMMAND LINE ARGUMENTS \*+=-----
-	// Make sure the are command line arguments
+	// Make sure that there are command line arguments
 	if (argc < 2) { fprintf(stderr, "No input file\n\n" USAGE_HELPER); exit(-1); }
 	// Get the path, unless the first argument is a flag, then we'll stop comipilng before getting the file
 	if (argv[1][0] != '-')
