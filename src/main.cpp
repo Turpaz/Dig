@@ -3,7 +3,6 @@
 #include "transpiler/transpiler.hpp"
 #include "preprocessor/preprocessor.hpp"
 
-#include <iostream>
 #include <string>
 #include <fstream>
 #include <streambuf>
