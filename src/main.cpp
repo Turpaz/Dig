@@ -11,17 +11,32 @@
 using std::string;
 
 string getfile(string name);
+inline bool does_file_exist(string path);
 
 int main(int argc, char** argv)
 {
-	// TODO: Bother with command line arguments and make the program act as intended
+	string path;
+	string output_file;
+	string src;
 
-	string path = "../test/test.dg"; // FIXME: look 2 lines up this is only temporary
-	string src = getfile(path);
+	// Get path and options
+	if (argc < 2) { fprintf(stderr, "No input file\n" USAGE_HELPER); exit(-1); }
+	// TODO: Bother with getting options
+
+	// Get file path and set output_file (if -o option is set this will change)
+	path = argv[1];
+	if (!does_file_exist(path)) { fprintf(stderr, "Input file doesn't exist\n" USAGE_HELPER); exit(-1); }
+	output_file = path.substr(0, path.find_last_of('.')) + ".exe"; // FIXME: might not be correct
+
+	// TODO: Bother with implementing options
+
+	// Get the file
+	src = getfile(path);
 
 	// Preprocess
 	preprocess(src);
 
+	// Begging of actual compilation process
 	Lexer lexer(src, path);
 	//Parser parser;
 	//Transpiler transpiler;
@@ -49,4 +64,10 @@ string getfile(string name)
 				std::istreambuf_iterator<char>());
 	
 	return str;
+}
+
+inline bool does_file_exist(string path)
+{
+	std::ifstream f(path.c_str());
+	return f.good();
 }
