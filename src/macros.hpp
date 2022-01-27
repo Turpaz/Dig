@@ -9,7 +9,7 @@
 #define ANSI_COLOR_CYAN    "\x1b[36m"
 #define ANSI_COLOR_RESET   "\x1b[0m"
 
-#define USAGE_HELPER "Usage: \"dig filepath [options]\"\n\texample: \"dig main.dg -o main.exe\"\n\
+#define USAGE_HELPER "Usage: \"dig input_file_path [options]\"\n\texample: \"dig main.dg -o main.exe\"\n\
 Options:\n\
 \t-o <file>\t\t\t\t\tSet output file to <file>, the default will be the file name but with .exe extension\n\
 "
