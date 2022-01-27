@@ -100,31 +100,31 @@ inline void get_options(int argc, char** argv, int &opts, string& path, string& 
 	int opt;
 
 	while ((opt = getopt(argc, argv, ":" CMD_OPTIONS_STRING)) != -1)
-    {
-        switch(opt)
-        {
-            case 'o':
-                opts |= cmd_args::_o;
+	{
+		switch(opt)
+		{
+			case 'o':
+				opts |= cmd_args::_o;
 				_o.assign(optarg);
-                break;
-            case 'h':
-                opts |= cmd_args::_h;
-                break;
-            case 'v':
-                opts |= cmd_args::_v;
-                break;
-            case 'E':
-                opts |= cmd_args::_E;
-                break;
-            case ':':
-                printf("Option -%c requires a value.\n", optopt);
-                exit(-1);
-            case '?':
-                printf("Unknown option: -%c.\n", optopt);
-                exit(-1);
+				break;
+			case 'h':
+				opts |= cmd_args::_h;
+				break;
+			case 'v':
+				opts |= cmd_args::_v;
+				break;
+			case 'E':
+				opts |= cmd_args::_E;
+				break;
+			case ':':
+				printf("Option -%c requires a value.\n", optopt);
+				exit(-1);
+			case '?':
+				printf("Unknown option: -%c.\n", optopt);
+				exit(-1);
 			default:
 				fprintf(stderr, ERROR_WE_DONT_KNOW);
 				exit(-1);
-        }
-    }
+		}
+	}
 }
