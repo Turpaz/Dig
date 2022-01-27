@@ -20,12 +20,12 @@ int main(int argc, char** argv)
 	string src;
 
 	// Get path and options
-	if (argc < 2) { fprintf(stderr, "No input file\n" USAGE_HELPER); exit(-1); }
+	if (argc < 2) { fprintf(stderr, "No input file\n\n" USAGE_HELPER); exit(-1); }
 	// TODO: Bother with getting options
 
 	// Get file path and set output_file (if -o option is set this will change)
 	path = argv[1];
-	if (!does_file_exist(path)) { fprintf(stderr, "Input file doesn't exist\n" USAGE_HELPER); exit(-1); }
+	if (!does_file_exist(path)) { fprintf(stderr, "Input file doesn't exist\n\n" USAGE_HELPER); exit(-1); }
 	output_file = path.substr(0, path.find_last_of('.')) + ".exe"; // FIXME: might not be correct
 
 	// TODO: Bother with implementing options

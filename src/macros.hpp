@@ -11,7 +11,7 @@
 
 #define USAGE_HELPER "Usage: \"dig input_file_path [options]\"\n\texample: \"dig main.dg -o main.exe\"\n\
 Options:\n\
-\t-o <file>\t\t\t\t\tSet output file to <file>, the default will be the file name but with .exe extension\n\
+\t-o <file>\t\t\tSet output file to <file>, the default will be the file name but with .exe extension\n\
 "
 
 #define ERROR_WE_DONT_KNOW "Something went horribly wrong, probably a bug in the compiler itself, sorry"
