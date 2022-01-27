@@ -11,7 +11,10 @@
 
 #define USAGE_HELPER "Usage: \"dig input_file_path [options]\"\n\texample: \"dig main.dg -o main.exe\"\n\
 Options:\n\
-\t-o <file>\t\t\tSet output file to <file>, the default will be the file name but with .exe extension\n\
+\t-o <file>\t\t\tSet output file to <file>, the default will be the file name but with .exe extension.\n\
+\t-h, --help\t\t\tShow the help page, including this text.\n\
+\n\
+\t-E\t\t\tPreprocess only.\n\
 "
 
 #define ERROR_WE_DONT_KNOW "Something went horribly wrong, probably a bug in the compiler itself, sorry"
@@ -21,5 +24,15 @@ Options:\n\
 #define ERROR_CHAR_TOO_LONG "Single quotes are meant for single character literals, more were given"
 
 #define IS_HEXA_DIGIT(c) ( (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F') )
+
+ // Max 32 command line arguments
+class CmdArgs
+{
+public:
+    static const unsigned None	= 0;
+    static const unsigned _o		= (1 << 0);
+    static const unsigned _h		= (1 << 1);
+    static const unsigned _E		= (1 << 2);
+};
 
 #endif // MACROS_HPP
