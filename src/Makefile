@@ -11,7 +11,7 @@ all:
 	$(CPP) $(LDFLAGS) $(CFLAGS) -o $(TARGET) $(SOURCES)
 
 test:
-	$(TARGET) $(TEST_CODE) $(TEST_TARGET)
+	$(TARGET) $(TEST_CODE) -o $(TEST_TARGET)
 #	$(TEST_TARGET)
 
 clean:
