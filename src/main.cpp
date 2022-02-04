@@ -62,7 +62,7 @@ int main(int argc, char** argv)
 	if (cmd_options & cmd_args::_E) { printf("%s", src.c_str()); exit(0); }
 
 	Lexer lexer(src, path);
-	//Parser parser;
+	Parser parser(&lexer);
 	//Transpiler transpiler;
 
 	Token tok;

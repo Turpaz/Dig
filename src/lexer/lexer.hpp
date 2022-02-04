@@ -24,6 +24,9 @@ private:
 public:
 	Lexer(string src, string path);
 	Token next();
+
+	void error(const char* format, ...);
+	void error(size_t at, const char* format, ...);
 private:
 	Token parse_alpha();
 	Token parse_digit();
@@ -37,9 +40,6 @@ private:
 
 	inline char c() const { return this->src[this->i]; }
 	inline char c(size_t i) const { return this->src[i]; }
-
-	void error(const char* format, ...);
-	void error(size_t at, const char* format, ...);
 };
 
 #endif // LEXER_LEXER_HPP
