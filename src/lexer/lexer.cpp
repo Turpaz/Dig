@@ -23,41 +23,7 @@ Token Lexer::next()
 		if ( c() == '"' )
 			return parse_string();
 		
-		// TODO: add parse_operator() function
-		// TODO: add more operators
-		switch (c())
-		{
-		case '(':
-			increment(); return Token(toktype::KEYWORD, (unsigned)operators::LPAREN, this->i);
-		case ')':
-			increment(); return Token(toktype::KEYWORD, (unsigned)operators::RPAREN, this->i);
-		case '{':
-			increment(); return Token(toktype::KEYWORD, (unsigned)operators::LBRACE, this->i);
-		case '}':
-			increment(); return Token(toktype::KEYWORD, (unsigned)operators::RBRACE, this->i);
-		case '=':
-			increment(); return Token(toktype::KEYWORD, (unsigned)operators::ASS, this->i);
-		case ';':
-			increment(); return Token(toktype::KEYWORD, (unsigned)operators::SEMI, this->i);
-		case '+':
-			increment(); return Token(toktype::KEYWORD, (unsigned)operators::PLUS, this->i);
-		case '-':
-			increment(); return Token(toktype::KEYWORD, (unsigned)operators::MINUS, this->i);
-		case '*':
-			increment(); return Token(toktype::KEYWORD, (unsigned)operators::MUL, this->i);
-		case '/':
-			increment(); return Token(toktype::KEYWORD, (unsigned)operators::DIV, this->i);
-		case '>':
-			increment(); return Token(toktype::KEYWORD, (unsigned)operators::GT, this->i);
-		case '<':
-			increment(); return Token(toktype::KEYWORD, (unsigned)operators::LT, this->i);
-		case ',':
-			increment(); return Token(toktype::KEYWORD, (unsigned)operators::COMMA, this->i);
-		case '\0':
-			break;
-		default:
-			error(UNEXPECTED_CHARACTER(c()));
-		}
+		return parse_operator();
 	}
 
 	return Token();
@@ -65,7 +31,7 @@ Token Lexer::next()
 
 Token Lexer::parse_alpha()
 {
-	size_t alphaBegin = i;
+	size_t index = this->i;
 	std::string v = "";
 
 	do
@@ -76,15 +42,15 @@ Token Lexer::parse_alpha()
 	
 	// if it's a keyword (or a variable type)
 	if (getKeywordOrVartypeFromString(v))
-		return Token(toktype::KEYWORD, getKeywordOrVartypeFromString(v), alphaBegin);
+		return Token(toktype::KEYWORD, getKeywordOrVartypeFromString(v), index);
 	
-	return Token(toktype::IDENTIFIER, v, alphaBegin);
+	return Token(toktype::IDENTIFIER, v, index);
 }
 
 Token Lexer::parse_digit()
 {
-	size_t digitBegin = i;
 	string v = "";
+	size_t index = this->i;
 	double number = 0;
 	char mode = 0; // 0 = decimal, 1 = hexadecimal, 2 = binary, 3 = octal
 
@@ -103,7 +69,7 @@ Token Lexer::parse_digit()
 		if (v.size() > 1) error(ERROR_CHAR_TOO_LONG);
 
 		number = v[0];
-		return Token(toktype::NUM, number, digitBegin);
+		return Token(toktype::NUM, number, index);
 	}
 
 	if (c() != '.')
@@ -150,7 +116,7 @@ Token Lexer::parse_digit()
 		else
 			error(ERROR_WE_DONT_KNOW);
 
-		return Token(toktype::NUM, number, digitBegin);
+		return Token(toktype::NUM, number, index);
 	}
 
 	// else
@@ -165,20 +131,20 @@ Token Lexer::parse_digit()
 
 	number = std::stold(v);
 	
-	return Token(toktype::NUM, number, digitBegin);
+	return Token(toktype::NUM, number, index);
 }
 
 Token Lexer::parse_string()
 {
 	string v = "";
-	size_t firstQuotePos = i;
-
+	size_t index = this->i;
+	
 	increment();
 
 	while (c() != '"' || (c() == '"' && c(i-1) == '\\') && c(i-2) != '\\')
 	{
 		if (c() == '\0')
-			error(firstQuotePos, ERROR_NO_MATCHING_QUOTE);
+			error(index, ERROR_NO_MATCHING_QUOTE);
 		
 		v += c();
 		increment();
@@ -188,7 +154,42 @@ Token Lexer::parse_string()
 	
 	v = account_special_characters(v);
 
-	return Token(toktype::STRING, v, firstQuotePos);
+	return Token(toktype::STRING, v, index);
+}
+
+Token Lexer::parse_operator()
+{
+	string v = "";
+	size_t index = this->i;
+
+	// Get the operator (or the operator plus some unnecessary characters)
+	for (int i = 0; i < MAX_OPERATOR_LENGTH; i++)
+	{
+		if (CAN_BE_OPERATOR(c()))
+		{
+			v += c();
+			increment();
+		}else break;
+	}
+
+	// check if the operator is in the language, if so - return the needed token, otherwise- decrement and try with a shorter string again
+	for (; v.size() > 0;)
+	{
+		#define KEYWORD(id, str)
+		#define VARTYPE(id, str)
+		#define OPERATOR(id, str) if (v == str) return Token(toktype::KEYWORD, static_cast<unsigned>(operators::id), index);
+		#include "../grammar/language.inc"
+		#undef KEYWORD
+		#undef VARTYPE
+		#undef OPERATOR
+
+		v.pop_back();
+		decrement();
+	}
+
+	error(UNEXPECTED_CHARACTER(c()));
+
+	return Token();
 }
 
 void Lexer::increment()
@@ -196,6 +197,14 @@ void Lexer::increment()
 	if (i < size && c() != '\0')
 	{
 		i++;
+	}
+}
+
+void Lexer::decrement()
+{
+	if (i > 0)
+	{
+		i--;
 	}
 }
 

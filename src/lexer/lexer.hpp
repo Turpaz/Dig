@@ -28,7 +28,9 @@ private:
 	Token parse_alpha();
 	Token parse_digit();
 	Token parse_string();
+	Token parse_operator();
 	void increment();
+	void decrement();
 	void skip_blank();
 	
 	string account_special_characters(const string& og);

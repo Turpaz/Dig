@@ -34,6 +34,12 @@ public:
 #define ERROR_CHAR_TOO_LONG "Single quotes are meant for single character literals, more were given"
 
 #define IS_HEXA_DIGIT(c) ( (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F') )
+#define CAN_BE_OPERATOR(c) ( (c >= 33 && c <= 47 && c != 34 && c != 39)\
+|| (c >= 58 && c <= 64)\
+|| (c >= 91 && c <= 96 && c != 92)\
+|| (c >= 123 && c <= 126))
+
+#define MAX_OPERATOR_LENGTH 3
 
 #define ANSI_COLOR_RED     "\x1b[31m"
 #define ANSI_COLOR_GREEN   "\x1b[32m"
