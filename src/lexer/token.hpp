@@ -30,6 +30,8 @@ public:
 			printf("(%f : NUM) at %zu\n", num, position);
 		else if (type == toktype::KEYWORD)
 			printf("(%s : KEYWORD) at %zu\n", getStringFromId(keyword).c_str(), position);
+		else if (type == toktype::OPERATOR)
+			printf("(%s : OPERATOR) at %zu\n", getStringFromId(keyword).c_str(), position);
 		else
 			printf("(\"\" : %s) at %zu\n", type == toktype::TOK_EOF ? "EOF" : "ERROR_TYPE", position);
 	}

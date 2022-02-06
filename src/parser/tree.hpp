@@ -10,6 +10,8 @@ using std::vector;
 using std::string;
 using std::map;
 
+namespace Nodes
+{
 struct Statement { size_t position; };
 struct Expression { size_t position; };
 
@@ -34,6 +36,16 @@ struct FunctionDecl : public Statement // fun name(args) { body }
 	string name;
 	map<vartypes, string> args;
 	vartypes rType; // if not specified, it is set to vartypes::VAR
+	StatementBlock body;
+};
+struct ClassDecl : public Statement // class name { body }
+{
+	string name; // TODO: add inheritance
+	StatementBlock body;
+};
+struct NamespaceDecl : public Statement // namespace name { body }
+{
+	string name;
 	StatementBlock body;
 };
 struct For : public Statement /* for init; condition; step || for init : INT e.g. for int i : [0:10:1] { ... } || for int i : 10 { ... } || for int i = 0; i < 10; i++ { ... } */
@@ -117,5 +129,6 @@ struct NumLiteralExpression : public Expression // Number literal: 12, 0.12, .12
 {
 	double value;
 };
+}
 
 #endif // PARSER_TREE_HPP

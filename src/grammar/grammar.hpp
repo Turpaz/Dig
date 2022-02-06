@@ -9,11 +9,12 @@ using std::string;
 enum class toktype : char
 {
 	IDENTIFIER,
-	STRING,
 
+	STRING,
 	NUM,
 
 	KEYWORD,
+	OPERATOR,
 
 	TOK_EOF,
 };

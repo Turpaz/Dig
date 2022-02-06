@@ -177,7 +177,7 @@ Token Lexer::parse_operator()
 	{
 		#define KEYWORD(id, str)
 		#define VARTYPE(id, str)
-		#define OPERATOR(id, str) if (v == str) return Token(toktype::KEYWORD, static_cast<unsigned>(operators::id), index);
+		#define OPERATOR(id, str) if (v == str) return Token(toktype::OPERATOR, static_cast<unsigned>(operators::id), index);
 		#include "../grammar/language.inc"
 		#undef KEYWORD
 		#undef VARTYPE
