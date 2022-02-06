@@ -1,4 +1,6 @@
 import math;
+// imoprt math as m;
+// import "../path/to/file.dg";
 
 fun main()
 {

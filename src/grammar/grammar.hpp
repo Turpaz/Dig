@@ -61,6 +61,10 @@ enum class operators : unsigned
 #define FIRST_VARTYPE_ID static_cast<unsigned>(vartypes::SETTING_START_VALUE_IGNORE_THIS + 1)
 #define FIRST_OPERATOR_ID static_cast<unsigned>(operators::SETTING_START_VALUE_IGNORE_THIS + 1)
 
+inline constexpr unsigned uenum(keywords k) { return static_cast<unsigned>(k); }
+inline constexpr unsigned uenum(vartypes k) { return static_cast<unsigned>(k); }
+inline constexpr unsigned uenum(operators k) { return static_cast<unsigned>(k); }
+
 unsigned getKeywordOrVartypeFromString(string s);
 string getStringFromId(unsigned i);
 

@@ -48,7 +48,7 @@ struct NamespaceDecl : public Statement // namespace name { body }
 	string name;
 	StatementBlock body;
 };
-struct For : public Statement /* for init; condition; step || for init : INT e.g. for int i : [0:10:1] { ... } || for int i : 10 { ... } || for int i = 0; i < 10; i++ { ... } */
+struct For : public Statement /* for init; condition; step || for init : INT e.g. for int i : 10 { ... } || for int i = 0; i < 10; i++ { ... } */
 {
 	VarDecl init;
 	Expression condition;

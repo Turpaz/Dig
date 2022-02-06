@@ -65,11 +65,15 @@ int main(int argc, char** argv)
 	Parser parser(&lexer);
 	//Transpiler transpiler;
 
+	TokenNode* root = NULL;
 	Token tok;
 	while ((tok = lexer.next()).type != toktype::TOK_EOF)
 	{
 		tok.print();
+		root->add_child(tok);
 	}
+
+	parser.parse(*root);
 
 	return 0;
 }

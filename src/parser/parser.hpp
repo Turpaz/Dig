@@ -13,13 +13,15 @@ private:
 public:
 	Parser(Lexer* lexer);
 
-	void parse_token(const Token& tok);
+	void parse(const TokenNode& tok);
 	void print_tree();
 private:
-	void error(const Token& tok, const char* format, ...);
+	void error(const TokenNode& tok, const char* format, ...);
 
-	void parse_statement(const Token& tok);
-	void parse_expression(const Token& tok);
+	Nodes::Statement parse_statement(const TokenNode& tok);
+	Nodes::Statement parse_keyword(const TokenNode& tok);
+	Nodes::Expression parse_expression(const TokenNode& tok);
+	Nodes::StatementBlock parse_block(const TokenNode& tok);
 
 	// TODO: maybe add more parse_things
 };

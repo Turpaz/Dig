@@ -38,4 +38,18 @@ public:
 private:
 };
 
+struct TokenNode
+{
+	Token tok;
+	TokenNode* next;
+	TokenNode(Token token, TokenNode* next=NULL) : tok(token), next(next) {}
+	void add_child(Token child)
+	{
+		if (next == NULL)
+			next = new TokenNode(child);
+		else
+			next->add_child(child);
+	}
+};
+
 #endif // LEXER_TOKEN_HPP
