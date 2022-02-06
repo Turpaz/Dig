@@ -70,9 +70,14 @@ struct Return : public Statement // return value;
 {
 	Expression value;
 };
-struct Import : public Statement // import math; TODO: maybe add a way to import a specific function or class
+struct ImportModule : public Statement // import math; import random as rdm; TODO: maybe add a way to import a specific function or class from the library
 {
 	string name;
+	string as; // default is the same as name
+};
+struct ImportFile : public Statement // import "src/file.dg"; import "constatnts.dg" as consts; TODO: maybe add a way to import a specific function or class from the file
+{
+	string path;
 	string as; // default is the same as name
 };
 struct Break : public Statement // break;

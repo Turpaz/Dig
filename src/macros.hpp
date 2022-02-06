@@ -38,6 +38,7 @@ public:
 || (c >= 58 && c <= 64)\
 || (c >= 91 && c <= 96 && c != 92)\
 || (c >= 123 && c <= 126))
+#define GET_JUST_FILENAME(path) path.substr(path.find_last_of('/'), path.find_last_of('.'))
 
 #define MAX_OPERATOR_LENGTH 3
 
