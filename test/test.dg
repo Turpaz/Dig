@@ -1,6 +1,11 @@
 import math;
-// imoprt math as m;
-// import "../path/to/file.dg";
+import math as m;
+import "../path/to/file.dg";
+
+fun foo(int a) : int // default return type is var
+{
+
+}
 
 fun main()
 {

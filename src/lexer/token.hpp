@@ -19,8 +19,9 @@ public:
 	Token(toktype type, string str, size_t position) : type(type), str(str), position(position) {}
 	Token(toktype type, double num, size_t position) : type(type), num(num), position(position) {}
 	Token(toktype type, unsigned keyword, size_t position) : type(type), keyword(keyword), position(position) {}
+	Token(toktype type, size_t position) : type(type), position(position) {}
+	Token(size_t position) : type(toktype::TOK_EOF), position(position) {}
 	Token() : type(toktype::TOK_EOF), str(""), num(0), position(-1) {}
-	Token(const Token& other) : type(other.type), str(other.str), num(other.num), position(other.position) {}
 
 	void print()
 	{
@@ -32,8 +33,12 @@ public:
 			printf("(%s : KEYWORD) at %zu\n", getStringFromId(keyword).c_str(), position);
 		else if (type == toktype::OPERATOR)
 			printf("(%s : OPERATOR) at %zu\n", getStringFromId(keyword).c_str(), position);
+		else if (type == toktype::TOK_EOF)
+			printf("(EOF : EOF) at %zu\n", position);
+		else if (type == toktype::ROOT)
+			printf("(ROOT : ROOT) at %zu\n", position);
 		else
-			printf("(\"\" : %s) at %zu\n", type == toktype::TOK_EOF ? "EOF" : "ERROR_TYPE", position);
+			printf("(\"\" : ERROR_TYPE) at %zu\n", position);
 	}
 private:
 };
@@ -43,12 +48,22 @@ struct TokenNode
 	Token tok;
 	TokenNode* next;
 	TokenNode(Token token, TokenNode* next=NULL) : tok(token), next(next) {}
+	TokenNode() : tok(toktype::ROOT, 0u, 0), next(NULL) {}
+
 	void add_child(Token child)
 	{
 		if (next == NULL)
 			next = new TokenNode(child);
 		else
 			next->add_child(child);
+	}
+
+	void print()
+	{
+		printf("TokenNode: ");
+		tok.print();
+		if (next != NULL)
+			next->print();
 	}
 };
 

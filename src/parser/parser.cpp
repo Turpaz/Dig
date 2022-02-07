@@ -7,18 +7,18 @@ Parser::Parser(Lexer* lexer)
 
 void Parser::parse(const TokenNode& tok)
 {
-	parse_statement(tok);
+	this->program.statements.push_back(parse_statement(tok));
 }
 
-void Parser::print_tree()
+void Parser::print()
 {
-	for (auto &&i : this->program.statements)
+	for (auto& statement : this->program.statements)
 	{
-		//i->print(); // TODO: Implement this
+		statement->print();
 	}
 }
 
-Nodes::Statement Parser::parse_statement(const TokenNode& tok)
+Nodes::Statement* Parser::parse_statement(const TokenNode& tok)
 {
 	switch(tok.tok.type)
 	{
@@ -28,16 +28,19 @@ Nodes::Statement Parser::parse_statement(const TokenNode& tok)
 			return parse_keyword(tok);
 		case toktype::IDENTIFIER: case toktype::STRING: case toktype::NUM: case toktype::OPERATOR:
 			if (tok.tok.keyword == uenum(operators::LBRACE))
-			{
 				return parse_block(tok);
-				break;
-			} else return Nodes::ExpressionStatement{tok.tok.position, parse_expression(tok)};
+			else return new Nodes::ExpressionStatement{tok.tok.position, parse_expression(tok)};
+		case toktype::ROOT:
+			//return new Nodes::RootStatement{tok.tok.position};
+			return parse_statement(*tok.next);
 		default:
 			error(tok, "Unexpected token: %s", tok.tok.str.c_str());
 	}
+
+	return new Nodes::Statement{tok.tok.position};
 }
 
-Nodes::Statement Parser::parse_keyword(const TokenNode& tok)
+Nodes::Statement* Parser::parse_keyword(const TokenNode& tok)
 {
 	switch (tok.tok.keyword)
 	{
@@ -47,17 +50,17 @@ Nodes::Statement Parser::parse_keyword(const TokenNode& tok)
 		{
 			// import "...";
 			if (tok.next->next->tok.type == toktype::OPERATOR && tok.next->next->tok.keyword == uenum(operators::SEMICOLON))
-				return Nodes::ImportFile{tok.tok.position, tok.next->tok.str, GET_JUST_FILENAME(tok.next->tok.str)};
+				return new Nodes::ImportFile{tok.tok.position, tok.next->tok.str, GET_JUST_FILENAME(tok.next->tok.str)};
 			 // import "..." as ...;
 			else if (tok.next->next->tok.type == toktype::KEYWORD && tok.next->next->tok.keyword == uenum(keywords::AS))
 			{
 				// Make sure we have a semicolon after the import
-				if (tok.next->next->next->next->tok.type == toktype::KEYWORD && tok.next->next->next->next->tok.keyword == uenum(operators::SEMICOLON))
+				if (tok.next->next->next->next->tok.type == toktype::OPERATOR && tok.next->next->next->next->tok.keyword == uenum(operators::SEMICOLON))
 					;
 				else error(tok, "Expected ';' after 'import \"...\" as ...' statement (import \"...\" as ...;)");
 				// Make sure we have an identifier after the as and return the import statement
 				if (tok.next->next->next->tok.type == toktype::IDENTIFIER)
-					return Nodes::ImportFile{tok.tok.position, tok.next->tok.str, tok.next->next->next->tok.str};
+					return new Nodes::ImportFile{tok.tok.position, tok.next->tok.str, tok.next->next->next->tok.str};
 				else error(tok, "Expected identifier after 'import \"...\" as' statement (import \"...\" as ...;)");
 			}
 			// Throw an error if we don't have a semicolon after the import
@@ -67,23 +70,25 @@ Nodes::Statement Parser::parse_keyword(const TokenNode& tok)
 		else if (tok.next->tok.type == toktype::IDENTIFIER)
 		{
 			// import ...;
-			if (tok.next->next->tok.type == toktype::KEYWORD && tok.next->next->tok.keyword == uenum(operators::SEMICOLON))
-				return Nodes::ImportModule{tok.tok.position, tok.next->tok.str};
+			if (tok.next->next->tok.type == toktype::OPERATOR && tok.next->next->tok.keyword == uenum(operators::SEMICOLON))
+				return new Nodes::ImportModule{tok.tok.position, tok.next->tok.str, tok.next->tok.str};
 			// import ... as ...;
 			else if (tok.next->next->tok.type == toktype::KEYWORD && tok.next->next->tok.keyword == uenum(keywords::AS))
 			{
 				// Make sure we have a semicolon after the import
-				if (tok.next->next->next->next->tok.type == toktype::KEYWORD && tok.next->next->next->next->tok.keyword == uenum(operators::SEMICOLON))
+				if (tok.next->next->next->next->tok.type == toktype::OPERATOR && tok.next->next->next->next->tok.keyword == uenum(operators::SEMICOLON))
 					;
 				else error(tok, "Expected ';' after 'import ... as ...' statement (import ... as ...;)");
 				// Make sure we have an identifier after the as and return the import statement
 				if (tok.next->next->next->tok.type == toktype::IDENTIFIER)
-					return Nodes::ImportModule{tok.tok.position, tok.next->tok.str, tok.next->next->next->tok.str};
+					return new Nodes::ImportModule{tok.tok.position, tok.next->tok.str, tok.next->next->next->tok.str};
 				else error(tok, "Expected identifier after 'import ... as' statement (import ... as ...;)");
 			}
+			// Throw an error if we don't have a semicolon after the import
 			else error(tok, "Expected ';' after 'import ...' statement (import ...;)");
 		}
-		else error(tok, "Expected ';' after 'import' statement (import ...;)");
+		// Throw an error if we don't have an identifier or string after the import
+		else error(tok, "Expected identifier or string after 'import' statement (import ...; / import \"...\";)");
 	case uenum(keywords::RETURN): 			// -----=====*****\ RETURN /*****=====-----
 		break;
 	case uenum(keywords::FOR):				// -----=====*****\ FOR /*****=====-----
@@ -118,6 +123,8 @@ Nodes::Statement Parser::parse_keyword(const TokenNode& tok)
 	default:
 		error(tok, "Unexpected keyword: %s", tok.tok.str.c_str());
 	}
+
+	return new Nodes::Statement{tok.tok.position};
 }
 
 
@@ -128,4 +135,14 @@ void Parser::error(const TokenNode& tok, const char* format, ...)
 	va_start(args, format);
 	this->lexer->error(tok.tok.position, format, args);
 	va_end(args);
+}
+
+Nodes::Expression* Parser::parse_expression(const TokenNode& tok)
+{
+	return new Nodes::Expression{tok.tok.position};
+}
+
+Nodes::StatementBlock* Parser::parse_block(const TokenNode& tok)
+{
+	return new Nodes::StatementBlock{tok.tok.position, vector<Nodes::Statement*>()};
 }

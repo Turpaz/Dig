@@ -17,6 +17,7 @@ enum class toktype : char
 	OPERATOR,
 
 	TOK_EOF,
+	ROOT,
 };
 
 enum class keywords : unsigned
@@ -62,8 +63,9 @@ enum class operators : unsigned
 #define FIRST_OPERATOR_ID static_cast<unsigned>(operators::SETTING_START_VALUE_IGNORE_THIS + 1)
 
 inline constexpr unsigned uenum(keywords k) { return static_cast<unsigned>(k); }
-inline constexpr unsigned uenum(vartypes k) { return static_cast<unsigned>(k); }
-inline constexpr unsigned uenum(operators k) { return static_cast<unsigned>(k); }
+inline constexpr unsigned uenum(vartypes v) { return static_cast<unsigned>(v); }
+inline constexpr unsigned uenum(operators o) { return static_cast<unsigned>(o); }
+inline constexpr char cenum(toktype t) { return static_cast<char>(t); }
 
 unsigned getKeywordOrVartypeFromString(string s);
 string getStringFromId(unsigned i);

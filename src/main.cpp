@@ -56,7 +56,7 @@ int main(int argc, char** argv)
 	//  -----=+*/ BEGINNING OF THE COMPILATION PROCESS! \*+=-----
 
 	// Preprocess
-	preprocess(src);
+	preprocess(src); // FIXME: Might be problematic, may interfere with the error position. we might have to skip comments in the lexer
 
 	// If the -E flag is set, print the code and exit with exit code 0
 	if (cmd_options & cmd_args::_E) { printf("%s", src.c_str()); exit(0); }
@@ -65,15 +65,16 @@ int main(int argc, char** argv)
 	Parser parser(&lexer);
 	//Transpiler transpiler;
 
-	TokenNode* root = NULL;
+	TokenNode* root = new TokenNode();
 	Token tok;
-	while ((tok = lexer.next()).type != toktype::TOK_EOF)
+	while (lexer.get_token(tok))
 	{
-		tok.print();
 		root->add_child(tok);
 	}
 
 	parser.parse(*root);
+
+	parser.print();
 
 	return 0;
 }

@@ -24,6 +24,7 @@ private:
 public:
 	Lexer(string src, string path);
 	Token next();
+	bool get_token(Token& tok) { tok = this->next(); return tok.type != toktype::TOK_EOF; }
 
 	void error(const char* format, ...);
 	void error(size_t at, const char* format, ...);

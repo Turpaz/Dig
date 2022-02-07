@@ -26,7 +26,7 @@ Token Lexer::next()
 		return parse_operator();
 	}
 
-	return Token();
+	return Token(this->i);
 }
 
 Token Lexer::parse_alpha()
@@ -39,7 +39,7 @@ Token Lexer::parse_alpha()
 		v += c();
 		increment();
 	} while (isalpha(c()) || c() == '_' || isdigit(c()));
-	
+
 	// if it's a keyword (or a variable type)
 	if (getKeywordOrVartypeFromString(v))
 		return Token(toktype::KEYWORD, getKeywordOrVartypeFromString(v), index);
