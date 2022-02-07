@@ -31,8 +31,9 @@ private:
 	inline Nodes::Break* parse_break(TokenNode& tok, int skip=0) const;
 	inline Nodes::Continue* parse_continue(TokenNode& tok, int skip=0) const;
 	inline Nodes::Ite* parse_if(TokenNode& tok, int skip=0) const;
-	// inline Nodes::ClassDecl* parse_class(TokenNode& tok, int skip=0) const;
+	// TODO: inline Nodes::ClassDecl* parse_class(TokenNode& tok, int skip=0) const;
 	inline Nodes::NamespaceDecl* parse_namespace(TokenNode& tok, int skip=0) const;
+	inline Nodes::FunctionDecl* parse_function(TokenNode& tok, int skip=0) const;
 
 	inline Nodes::Statement* parse_expression_statement(TokenNode& tok, int skip=0) const;
 

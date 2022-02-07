@@ -88,7 +88,7 @@ Nodes::Statement* Parser::parse_keyword(TokenNode& tok, int skip) const
 	case uenum(keywords::NAMESPACE): 		// -----=====*****\ NAMESPACE /*****=====-----
 		return parse_namespace(tok, 1);
 	case uenum(keywords::FUN): 				// -----=====*****\ FUN /*****=====-----
-		break;
+		return parse_function(tok, 1);
 	// VARTYPES
 	case uenum(vartypes::INT): 				// -----=====*****\ INT /*****=====-----
 		break;
@@ -402,6 +402,7 @@ inline Nodes::Ite* Parser::parse_if(TokenNode& tok, int skip) const
 		new Nodes::Ite{pos, condition, Nodes::StatementBlock{}, Nodes::StatementBlock{}},
 		tok, 1);
 }
+// TODO: inline Nodes::ClassDecl* Parser::parse_class(TokenNode& tok, int skip) const
 inline Nodes::NamespaceDecl* Parser::parse_namespace(TokenNode& tok, int skip=0) const
 {
 	size_t pos = tok.tok.position;
@@ -422,11 +423,114 @@ inline Nodes::NamespaceDecl* Parser::parse_namespace(TokenNode& tok, int skip=0)
 			new Nodes::NamespaceDecl{pos, name, *block},
 			tok, 0);
 	}
-	else error(tok, "Expected identifier namespace name (namespace <name> { <block> })");
+	else error(tok, "Expected identifier namespace name (namespace <name> { ... })");
 
 	// We should never reach this point
 	return incRet(
 		new Nodes::NamespaceDecl{pos, "", Nodes::StatementBlock{}},
+		tok, 1);
+}
+inline Nodes::FunctionDecl* Parser::parse_function(TokenNode& tok, int skip=0) const
+{
+	size_t pos = tok.tok.position;
+
+	for (int i = 0; i < skip; i++)
+	{
+		tok = *tok.next;
+	}
+
+	string name;
+	map<pair<vartypes, string>, Nodes::Expression*> params;
+	vartypes rType = vartypes::VAR;
+	Nodes::StatementBlock body;
+
+	// fun <name> ( <args> ) : <rType> { <body> }
+	if (tok.tok.type == toktype::IDENTIFIER)
+	{
+		// Get the function name
+		name = tok.tok.str;
+		tok = *tok.next;
+		// Get the arguments
+		if (tok.tok.type == toktype::OPERATOR && tok.tok.keyword == uenum(operators::LPAREN))
+		{
+			tok = *tok.next;
+			while (tok.tok.type != toktype::OPERATOR || tok.tok.keyword != uenum(operators::RPAREN))
+			{
+				pair<pair<vartypes, string>, Nodes::Expression*> param;
+				param.second = new Nodes::EmptyExpression{tok.tok.position};
+
+				// param type = VAR
+				if (tok.tok.type == toktype::IDENTIFIER)
+				{
+					param.first.first = vartypes::VAR;
+					param.first.second = tok.tok.str;
+					tok = *tok.next;
+				}
+				// Get param type
+				else if (tok.tok.type == toktype::KEYWORD && IS_ENUM_VARTYPE(tok.tok.keyword))
+				{
+					param.first.first = static_cast<vartypes>(tok.tok.keyword);
+					tok = *tok.next;
+					if (tok.tok.type == toktype::IDENTIFIER)
+					{
+						param.first.second = tok.tok.str;
+						tok = *tok.next;
+					}
+					else error(tok, "Expected identifier after type (type <name>) in parameter declaration");
+				}
+				else error(tok, "Expected parameter type or identifier (parameter name) if no type is specified var is assumed");
+
+				// Get the default value is exists
+				if (tok.tok.type == toktype::OPERATOR && tok.tok.keyword == uenum(operators::EQ))
+				{
+					tok = *tok.next;
+					param.second = parse_expression(tok);
+				}
+
+				// Add the parameter to the list
+				params.insert(param);
+
+				// Check if we reached the end of the parameters
+				if (tok.tok.type == toktype::OPERATOR && tok.tok.keyword == uenum(operators::RPAREN))
+				{
+					tok = *tok.next;
+					break;
+				}
+				// Check if we reached the end of this parameter
+				else if (tok.tok.type == toktype::OPERATOR && tok.tok.keyword == uenum(operators::COMMA))
+				{
+					tok = *tok.next;
+				}
+				else error(tok, "Expected ',' or ')' after parameter declaration");
+			}
+
+			// Get the return type if exists, otherwise assume var
+			if (tok.tok.type == toktype::OPERATOR && tok.tok.keyword == uenum(operators::COLON))
+			{
+				tok = *tok.next;
+				if (tok.tok.type == toktype::KEYWORD && IS_ENUM_VARTYPE(tok.tok.keyword))
+				{
+					rType = static_cast<vartypes>(tok.tok.keyword);
+					tok = *tok.next;
+				}
+				else error(tok, "Expected return type ( : <type>)");
+			}
+
+			// Get the function body
+			body = *parse_block(tok);
+
+			// Return the function
+			return incRet(
+				new Nodes::FunctionDecl{pos, name, params, rType, body},
+				tok, 0);
+		}
+		else error(tok, "Expected '(' after function name");
+	}
+	else error(tok, "Expected identifier function name (fun <name>( <args> ) : <rType> { ... })");
+	
+	// We should never reach this point
+	return incRet(
+		new Nodes::FunctionDecl{pos, name, params, rType, body},
 		tok, 1);
 }
 
@@ -461,7 +565,6 @@ void Parser::error(const TokenNode& tok, const char* format, ...) const
 	this->lexer->error(tok.tok.position, format, args);
 	va_end(args);
 }
-
 void Parser::warning(const TokenNode& tok, const char* format, ...) const
 {
 	va_list args;

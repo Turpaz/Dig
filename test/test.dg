@@ -2,7 +2,7 @@ import math;
 import math as m;
 import "../path/to/file.dg";
 
-fun foo(int a) : int // default return type is var
+fun foo(int a, b) : int // default return type is var // default parameter type is var
 {
 	;
 }
