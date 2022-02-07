@@ -271,29 +271,10 @@ string Lexer::account_special_characters(const string& og)
 
 void Lexer::error(const char* format, ...)
 {
-	size_t lineNumber = 1;
-	size_t characterNumberInLine = 1;
-	const char* j;
-	const char* jj;
-	// move j to i's character and count the '\n's in the way
-	for (j = this->src.c_str(); j < this->src.c_str()+this->i && *j != '\0'; j++)
-		if (*j == '\n')
-			lineNumber++;
-	// move jj to the begging of i's line
-	for (jj = j; *jj != '\n' && jj > src; jj--) ;
-	// calculate the column
-	characterNumberInLine = j - jj;
-	
-	fprintf(stderr, "%s:%zu:%zu " ANSI_COLOR_RED "error: " ANSI_COLOR_RESET, path.c_str(), lineNumber, characterNumberInLine);
-
 	va_list args;
 	va_start(args, format);
-	vfprintf(stderr, format, args);
+	this->error(this->i, format, args);
 	va_end(args);
-
-	fprintf(stderr, "\n");
-
-	exit(-1);
 }
 
 void Lexer::error(size_t at, const char* format, ...)
@@ -321,4 +302,37 @@ void Lexer::error(size_t at, const char* format, ...)
 	fprintf(stderr, "\n");
 
 	exit(-1);
+}
+
+void Lexer::warning(const char* format, ...)
+{
+	va_list args;
+	va_start(args, format);
+	this->warning(this->i, format, args);
+	va_end(args);
+}
+
+void Lexer::warning(size_t at, const char* format, ...)
+{
+	size_t lineNumber = 1;
+	size_t characterNumberInLine = 1;
+	const char* j;
+	const char* jj;
+	// move j to at's character and count the '\n's in the way
+	for (j = this->src.c_str(); j < this->src.c_str()+at && *j != '\0'; j++)
+		if (*j == '\n')
+			lineNumber++;
+	// move jj to the begging of at's line
+	for (jj = j; *jj != '\n' && jj > src; jj--) ;
+	// calculate the column
+	characterNumberInLine = j - jj;
+	
+	fprintf(stderr, "%s:%zu:%zu " ANSI_COLOR_MAGENTA "warning: " ANSI_COLOR_RESET, path.c_str(), lineNumber, characterNumberInLine);
+
+	va_list args;
+	va_start(args, format);
+	vfprintf(stderr, format, args);
+	va_end(args);
+
+	fprintf(stderr, "\n");
 }

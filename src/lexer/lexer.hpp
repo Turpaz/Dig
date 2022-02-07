@@ -28,6 +28,8 @@ public:
 
 	void error(const char* format, ...);
 	void error(size_t at, const char* format, ...);
+	void warning(const char* format, ...);
+	void warning(size_t at, const char* format, ...);
 private:
 	Token parse_alpha();
 	Token parse_digit();

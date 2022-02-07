@@ -17,6 +17,7 @@ public:
 	void print() const;
 private:
 	void error(const TokenNode& tok, const char* format, ...) const;
+	void warning(const TokenNode& tok, const char* format, ...) const;
 
 	Nodes::Statement* parse_statement(TokenNode& tok, int skip=0) const;
 	Nodes::Statement* parse_keyword(TokenNode& tok, int skip=0) const;
@@ -24,10 +25,19 @@ private:
 	Nodes::StatementBlock* parse_block(TokenNode& tok, int skip=0) const;
 
 	inline Nodes::Statement* parse_import(TokenNode& tok, int skip=0) const;
+	inline Nodes::Statement* parse_return(TokenNode& tok, int skip=0) const;
+	inline Nodes::Statement* parse_for(TokenNode& tok, int skip=0) const;
+	inline Nodes::While* parse_while(TokenNode& tok, int skip=0) const;
+	inline Nodes::Break* parse_break(TokenNode& tok, int skip=0) const;
+	inline Nodes::Continue* parse_continue(TokenNode& tok, int skip=0) const;
+	inline Nodes::Ite* parse_if(TokenNode& tok, int skip=0) const;
+	// inline Nodes::ClassDecl* parse_class(TokenNode& tok, int skip=0) const;
+	inline Nodes::NamespaceDecl* parse_namespace(TokenNode& tok, int skip=0) const;
+
 	inline Nodes::Statement* parse_expression_statement(TokenNode& tok, int skip=0) const;
 
-	inline Nodes::Statement* incRet(Nodes::Statement* statement, TokenNode& tok, size_t times) const { for (size_t i = 0; i < times; i++) tok = *tok.next; return statement; };
-	inline Nodes::Expression* incRet(Nodes::Expression* expression, TokenNode& tok, size_t times) const { for (size_t i = 0; i < times; i++) tok = *tok.next; return expression; };
+	template<typename T>
+	inline T* incRet(T* statement, TokenNode& tok, size_t times) const { for (size_t i = 0; i < times; i++) tok = *tok.next; return statement; };
 };
 
 #endif // PARSER_PARSER_HPP

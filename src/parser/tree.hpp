@@ -44,6 +44,7 @@ struct StatementBlock : public Statement // A block of statements { ... }
 	vector<Statement*> statements;
 
 	StatementBlock(size_t position, vector<Statement*> statements) : Statement(position), statements(statements) {}
+	StatementBlock(size_t position) : Statement(position), statements() {}
 	StatementBlock() : Statement(0), statements() {}
 	~StatementBlock() { for (auto& statement : statements) delete statement; }
 
@@ -186,14 +187,14 @@ struct NamespaceDecl : public Statement // namespace name { body }
 		body.printBlock();
 	}
 };
-struct For : public Statement /* for init; condition; step || for init : INT e.g. for int i : 10 { ... } || for int i; i < 10; i++ { ... } */
+struct For : public Statement /* for init; condition; step e.g. for int i; i < 10; i++ { ... } */
 {
-	Statement* init;
+	Expression* init;
 	Expression* condition;
 	Expression* step;
-	StatementBlock body;
+	StatementBlock* body;
 
-	For(size_t position, Statement* init, Expression* condition, Expression* step, StatementBlock body) : Statement(position), init(init), condition(condition), step(step), body(body) {}
+	For(size_t position, Expression* init, Expression* condition, Expression* step, StatementBlock* body) : Statement(position), init(init), condition(condition), step(step), body(body) {}
 
 	void print() const
 	{
@@ -204,40 +205,40 @@ struct For : public Statement /* for init; condition; step || for init : INT e.g
 		printf("; ");
 		step->print();
 		printf("\n");
-		body.printBlock();
+		body->printBlock();
 	}
 };
-struct ForIter : public Statement // for init : iter { body } e.g: for int i : [0:10:1] { ... }, for str c : "hello" { ... }
+struct ForIter : public Statement // for init : iterOrNum { body } e.g: for int i : [0:10:1] { ... }, for int i : 10 { ... }
 {
-	Statement* init;
-	Expression* iter;
-	StatementBlock body;
+	Expression* init;
+	Expression* iterOrNum;
+	StatementBlock* body;
 
-	ForIter(size_t position, Statement* init, Expression* iter, StatementBlock body) : Statement(position), init(init), iter(iter), body(body) {}
+	ForIter(size_t position, Expression* init, Expression* iterOrNum, StatementBlock* body) : Statement(position), init(init), iterOrNum(iterOrNum), body(body) {}
 
 	void print() const
 	{
 		printf("(ForIter at %zu)\nfor ", position);
 		init->print();
 		printf(" : ");
-		iter->print();
+		iterOrNum->print();
 		printf("\n");
-		body.printBlock();
+		body->printBlock();
 	}
 };
 struct While : public Statement // while condition { body }
 {
 	Expression* condition;
-	StatementBlock body;
+	StatementBlock* body;
 
-	While(size_t position, Expression* condition, StatementBlock body) : Statement(position), condition(condition), body(body) {}
+	While(size_t position, Expression* condition, StatementBlock* body) : Statement(position), condition(condition), body(body) {}
 
 	void print() const
 	{
 		printf("(While at %zu)\nwhile ", position);
 		condition->print();
 		printf("\n");
-		body.printBlock();
+		body->printBlock();
 	}
 };
 struct Return : public Statement // return value;
@@ -412,6 +413,21 @@ struct FunctionCallExpression : public Expression // Call a function (return som
 		printf(")\n");
 	}
 };
+struct VerDeclExpression : public Expression // VerDecl is a variable declaration
+{
+	vartypes type;
+	string name;
+	Expression* value; // if value is not specified, it is set to default (0, "", etc.)
+
+	VerDeclExpression(size_t position, vartypes type, string name, Expression* value) : Expression(position), type(type), name(name), value(value) {}
+
+	void print() const
+	{
+		printf("(VarDeclExpression at %zu)\n%s %s = ", position, getStringFromId(uenum(type)).c_str(), name.c_str());
+		value->print();
+		printf(";\n");
+	}
+};
 struct ArrayAccessExpression : public Expression // Access array element: array[index]
 {
 	Expression* array;
@@ -426,6 +442,20 @@ struct ArrayAccessExpression : public Expression // Access array element: array[
 		printf("[");
 		index->print();
 		printf("]\n");
+	}
+};
+struct MemberAccessExpression : public Expression // Call a member of an object: object.name;
+{
+	Expression* object;
+	string name;
+
+	MemberAccessExpression(size_t position, Expression* object, string name) : Expression(position), object(object), name(name) {}
+
+	void print() const
+	{
+		printf("(MemberExpression at %zu) ", position);
+		object->print();
+		printf(".%s\n", name.c_str());
 	}
 };
 struct IdentifierExpression : public Expression // Access Variable: name

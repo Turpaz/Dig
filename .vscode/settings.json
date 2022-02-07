@@ -55,5 +55,9 @@
 		"xutility": "cpp",
 		"*.inc": "cpp",
 		"string_view": "cpp"
-	}
+	},
+	"cSpell.words": [
+		"cenum",
+		"uenum"
+	]
 }
