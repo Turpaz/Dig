@@ -35,7 +35,7 @@ Nodes::Statement* Parser::parse_statement(TokenNode& tok, int skip) const
 	switch(tok.tok.type)
 	{
 		case toktype::TOK_EOF:
-			break; // TODO: maybe do something more, such as stop parsing
+			break; // Should never happen
 		case toktype::KEYWORD:
 			return parse_keyword(tok);
 		case toktype::IDENTIFIER: case toktype::STRING: case toktype::NUM: case toktype::OPERATOR:
@@ -57,6 +57,20 @@ Nodes::Statement* Parser::parse_statement(TokenNode& tok, int skip) const
 
 	return incRet(
 		new Nodes::Statement{tok.tok.position},
+		tok, 1);
+}
+
+Nodes::Expression* Parser::parse_expression(TokenNode& tok, int skip) const
+{
+	for (int i = 0; i < skip; i++)
+	{
+		tok = *tok.next;
+	}
+
+	// TODO: Implement
+
+	return incRet(
+		new Nodes::Expression{tok.tok.position},
 		tok, 1);
 }
 
@@ -89,39 +103,16 @@ Nodes::Statement* Parser::parse_keyword(TokenNode& tok, int skip) const
 		return parse_namespace(tok, 1);
 	case uenum(keywords::FUN): 				// -----=====*****\ FUN /*****=====-----
 		return parse_function(tok, 1);
-	// VARTYPES
-	case uenum(vartypes::INT): 				// -----=====*****\ INT /*****=====-----
-		break;
-	case uenum(vartypes::FLOAT): 			// -----=====*****\ FLOAT /*****=====-----
-		break;
-	case uenum(vartypes::STR): 				// -----=====*****\ STR /*****=====-----
-		break;
-	case uenum(vartypes::BOOL): 			// -----=====*****\ BOOL /*****=====-----
-		break;
-	case uenum(vartypes::ARR): 				// -----=====*****\ ARR /*****=====-----
-		break;
-	case uenum(vartypes::VAR): 				// -----=====*****\ VAR /*****=====-----
-		break;
 	default:
-		error(tok, "Unexpected keyword: %s", tok.tok.str.c_str());
+		// VARTYPES or ERROR
+		if (IS_ENUM_VARTYPE(tok.tok.keyword))
+			return parse_variable(tok, 0);
+		else
+			error(tok, "Unexpected keyword: %s", tok.tok.str.c_str());
 	}
 
 	return incRet(
 		new Nodes::Statement{tok.tok.position},
-		tok, 1);
-}
-
-Nodes::Expression* Parser::parse_expression(TokenNode& tok, int skip) const
-{
-	for (int i = 0; i < skip; i++)
-	{
-		tok = *tok.next;
-	}
-
-	// TODO: Implement
-
-	return incRet(
-		new Nodes::Expression{tok.tok.position},
 		tok, 1);
 }
 
@@ -403,7 +394,7 @@ inline Nodes::Ite* Parser::parse_if(TokenNode& tok, int skip) const
 		tok, 1);
 }
 // TODO: inline Nodes::ClassDecl* Parser::parse_class(TokenNode& tok, int skip) const
-inline Nodes::NamespaceDecl* Parser::parse_namespace(TokenNode& tok, int skip=0) const
+inline Nodes::NamespaceDecl* Parser::parse_namespace(TokenNode& tok, int skip) const
 {
 	size_t pos = tok.tok.position;
 
@@ -430,7 +421,7 @@ inline Nodes::NamespaceDecl* Parser::parse_namespace(TokenNode& tok, int skip=0)
 		new Nodes::NamespaceDecl{pos, "", Nodes::StatementBlock{}},
 		tok, 1);
 }
-inline Nodes::FunctionDecl* Parser::parse_function(TokenNode& tok, int skip=0) const
+inline Nodes::FunctionDecl* Parser::parse_function(TokenNode& tok, int skip) const
 {
 	size_t pos = tok.tok.position;
 
@@ -531,6 +522,82 @@ inline Nodes::FunctionDecl* Parser::parse_function(TokenNode& tok, int skip=0) c
 	// We should never reach this point
 	return incRet(
 		new Nodes::FunctionDecl{pos, name, params, rType, body},
+		tok, 1);
+}
+inline Nodes::VarDecl* Parser::parse_variable(TokenNode& tok, int skip) const
+{
+	size_t pos = tok.tok.position;
+
+	for (int i = 0; i < skip; i++)
+	{
+		tok = *tok.next;
+	}
+
+	string name;
+	vartypes type = vartypes::VAR;
+	Nodes::Expression* value;
+
+	// <type> <name> = <value>
+	if (tok.tok.type == toktype::KEYWORD && IS_ENUM_VARTYPE(tok.tok.keyword))
+	{
+		// Get the variable type
+		type = static_cast<vartypes>(tok.tok.keyword);
+		tok = *tok.next;
+		if (tok.tok.type == toktype::IDENTIFIER)
+		{
+			// Get the variable name
+			name = tok.tok.str;
+			tok = *tok.next;
+			// Get the variable value if exists
+			if (tok.tok.type == toktype::OPERATOR && tok.tok.keyword == uenum(operators::EQ))
+			{
+				tok = *tok.next;
+				value = parse_expression(tok);
+
+				return incRet(
+					new Nodes::VarDecl{pos, type, name, value},
+					tok, 0);
+			}
+			// If there is no value, look for a semicolon
+			else if (tok.tok.type == toktype::OPERATOR && tok.tok.keyword == uenum(operators::SEMICOLON))
+			{
+				tok = *tok.next;
+				// Set the default value to whatever the type's default is
+				switch (type)
+				{
+				case vartypes::BOOL:
+					value = new Nodes::BoolLiteralExpression{pos, false};
+					break;
+				case vartypes::INT: case vartypes::FLOAT:
+					value = new Nodes::NumLiteralExpression{pos, 0};
+					break;
+				case vartypes::STR:
+					value = new Nodes::StringLiteralExpression{pos, ""};
+					break;
+				case vartypes::VAR:
+					value = new Nodes::NullLiteralExpression{pos};
+					break;
+				case vartypes::ARR:
+					value = new Nodes::ArrayLiteralExpression{pos, {}};
+					break;
+				default:
+					value = new Nodes::NullLiteralExpression{pos};
+					break;
+				}
+				
+				return incRet(
+					new Nodes::VarDecl{pos, type, name, value},
+					tok, 0);
+			}
+			else error(tok, "Expected '=' or ';' after variable declaration");
+		}
+		else error(tok, "Expected identifier after type (<type> <name> = <value>;)");
+	}
+	else error(tok, "Expected variable type (<type> <name> = <value>;)");
+
+	// We should never reach this point
+	return incRet(
+		new Nodes::VarDecl{pos, type, name, value},
 		tok, 1);
 }
 

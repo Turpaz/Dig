@@ -57,18 +57,18 @@ enum class operators : unsigned
 	__END
 };
 
-// tools to differentiate between a keyword, a vartype and an operator
-#define FIRST_KEYWORD_ID (static_cast<unsigned>(keywords::__BEGIN) + 1)
-#define LAST_KEYWORD_ID (static_cast<unsigned>(keywords::__END) - 1)
-#define FIRST_VARTYPE_ID (static_cast<unsigned>(vartypes::__BEGIN) + 1)
-#define LAST_VARTYPE_ID (static_cast<unsigned>(vartypes::__END) - 1)
-#define FIRST_OPERATOR_ID (static_cast<unsigned>(operators::__BEGIN) + 1)
-#define LAST_OPERATOR_ID (static_cast<unsigned>(operators::__END) - 1)
-
 inline constexpr unsigned uenum(keywords k) { return static_cast<unsigned>(k); }
 inline constexpr unsigned uenum(vartypes v) { return static_cast<unsigned>(v); }
 inline constexpr unsigned uenum(operators o) { return static_cast<unsigned>(o); }
 inline constexpr char cenum(toktype t) { return static_cast<char>(t); }
+
+// tools to differentiate between a keyword, a vartype and an operator
+#define FIRST_KEYWORD_ID (uenum(keywords::__BEGIN) + 1)
+#define LAST_KEYWORD_ID (uenum(keywords::__END) - 1)
+#define FIRST_VARTYPE_ID (uenum(vartypes::__BEGIN) + 1)
+#define LAST_VARTYPE_ID (uenum(vartypes::__END) - 1)
+#define FIRST_OPERATOR_ID (uenum(operators::__BEGIN) + 1)
+#define LAST_OPERATOR_ID (uenum(operators::__END) - 1)
 
 unsigned getKeywordOrVartypeFromString(string s);
 string getStringFromId(unsigned i);

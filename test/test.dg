@@ -4,7 +4,7 @@ import "../path/to/file.dg";
 
 fun foo(int a, b) : int // default return type is var // default parameter type is var
 {
-	;
+	return a + b;
 }
 
 fun main()

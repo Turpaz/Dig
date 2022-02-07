@@ -34,6 +34,7 @@ private:
 	// TODO: inline Nodes::ClassDecl* parse_class(TokenNode& tok, int skip=0) const;
 	inline Nodes::NamespaceDecl* parse_namespace(TokenNode& tok, int skip=0) const;
 	inline Nodes::FunctionDecl* parse_function(TokenNode& tok, int skip=0) const;
+	inline Nodes::VarDecl* parse_variable(TokenNode& tok, int skip=0) const;
 
 	inline Nodes::Statement* parse_expression_statement(TokenNode& tok, int skip=0) const;
 
