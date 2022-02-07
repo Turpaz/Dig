@@ -66,16 +66,16 @@ struct StatementBlock : public Statement // A block of statements { ... }
 };
 struct Ite : public Statement // if condition { ifBranch } else { elseBranch }
 {
-	Expression condition;
+	Expression* condition;
 	StatementBlock ifBranch;
 	StatementBlock elseBranch;
 
-	Ite(size_t position, Expression condition, StatementBlock ifBranch, StatementBlock elseBranch) : Statement(position), condition(condition), ifBranch(ifBranch), elseBranch(elseBranch) {}
+	Ite(size_t position, Expression* condition, StatementBlock ifBranch, StatementBlock elseBranch) : Statement(position), condition(condition), ifBranch(ifBranch), elseBranch(elseBranch) {}
 
 	void print() const
 	{
 		printf("(Ite at %zu)\nif ", position);
-		condition.print();
+		condition->print();
 		printf("\n");
 		ifBranch.printBlock();
 		printf("else\n");
@@ -86,25 +86,25 @@ struct VarDecl : public Statement // type name = value; type name;
 {
 	vartypes type;
 	string name;
-	Expression value; // if value is not specified, it is set to default (0, "", etc.)
+	Expression* value; // if value is not specified, it is set to default (0, "", etc.)
 
-	VarDecl(size_t position, vartypes type, string name, Expression value) : Statement(position), type(type), name(name), value(value) {}
+	VarDecl(size_t position, vartypes type, string name, Expression* value) : Statement(position), type(type), name(name), value(value) {}
 
 	void print() const
 	{
 		printf("(VarDecl at %zu)\n%s %s = ", position, getStringFromId(uenum(type)).c_str(), name.c_str());
-		value.print();
+		value->print();
 		printf(";\n");
 	}
 };
 struct FunctionDecl : public Statement // fun name(args) { body }
 {
 	string name;
-	map<pair<vartypes, string>, Expression> args;
+	map<pair<vartypes, string>, Expression*> args;
 	vartypes rType; // if not specified, it is set to vartypes::VAR
 	StatementBlock body;
 
-	FunctionDecl(size_t position, string name, map<pair<vartypes, string>, Expression> args, vartypes rType, StatementBlock body) : Statement(position), name(name), args(args), rType(rType), body(body) {}
+	FunctionDecl(size_t position, string name, map<pair<vartypes, string>, Expression*> args, vartypes rType, StatementBlock body) : Statement(position), name(name), args(args), rType(rType), body(body) {}
 
 	void print() const
 	{
@@ -112,7 +112,7 @@ struct FunctionDecl : public Statement // fun name(args) { body }
 		for (auto& arg : args)
 		{
 			printf("%s %s = ", getStringFromId(uenum(arg.first.first)).c_str(), arg.first.second.c_str());
-			arg.second.print();
+			arg.second->print();
 			printf(", ");
 		}
 		printf(")\n");
@@ -122,11 +122,11 @@ struct FunctionDecl : public Statement // fun name(args) { body }
 struct ClassSysFunctionDecl : public Statement
 {
 	string name; // initialize, terminate, __str__, __OP_PLUS__, etc.
-	map<pair<vartypes, string>, Expression> args;
+	map<pair<vartypes, string>, Expression*> args;
 	vartypes rType;
 	StatementBlock body;
 
-	ClassSysFunctionDecl(size_t position, string name, map<pair<vartypes, string>, Expression> args, vartypes rType, StatementBlock body) : Statement(position), name(name), args(args), rType(rType), body(body) {}
+	ClassSysFunctionDecl(size_t position, string name, map<pair<vartypes, string>, Expression*> args, vartypes rType, StatementBlock body) : Statement(position), name(name), args(args), rType(rType), body(body) {}
 
 	void print() const
 	{
@@ -134,7 +134,7 @@ struct ClassSysFunctionDecl : public Statement
 		for (auto& arg : args)
 		{
 			printf("%s %s = ", getStringFromId(uenum(arg.first.first)).c_str(), arg.first.second.c_str());
-			arg.second.print();
+			arg.second->print();
 			printf(", ");
 		}
 		printf(")\n");
@@ -186,70 +186,70 @@ struct NamespaceDecl : public Statement // namespace name { body }
 		body.printBlock();
 	}
 };
-struct For : public Statement /* for init; condition; step || for init : INT e.g. for int i : 10 { ... } || for int i = 0; i < 10; i++ { ... } */
+struct For : public Statement /* for init; condition; step || for init : INT e.g. for int i : 10 { ... } || for int i; i < 10; i++ { ... } */
 {
-	VarDecl init;
-	Expression condition;
-	Expression step;
+	Statement* init;
+	Expression* condition;
+	Expression* step;
 	StatementBlock body;
 
-	For(size_t position, VarDecl init, Expression condition, Expression step, StatementBlock body) : Statement(position), init(init), condition(condition), step(step), body(body) {}
+	For(size_t position, Statement* init, Expression* condition, Expression* step, StatementBlock body) : Statement(position), init(init), condition(condition), step(step), body(body) {}
 
 	void print() const
 	{
 		printf("(For at %zu)\nfor ", position);
-		init.print();
+		init->print();
 		printf("; ");
-		condition.print();
+		condition->print();
 		printf("; ");
-		step.print();
+		step->print();
 		printf("\n");
 		body.printBlock();
 	}
 };
-struct ForIter : public Statement // for init : iter { body } e.g: for int i : [0:10:1] { ... }, for char c : "hello" { ... }
+struct ForIter : public Statement // for init : iter { body } e.g: for int i : [0:10:1] { ... }, for str c : "hello" { ... }
 {
-	VarDecl init;
-	Expression iter;
+	Statement* init;
+	Expression* iter;
 	StatementBlock body;
 
-	ForIter(size_t position, VarDecl init, Expression iter, StatementBlock body) : Statement(position), init(init), iter(iter), body(body) {}
+	ForIter(size_t position, Statement* init, Expression* iter, StatementBlock body) : Statement(position), init(init), iter(iter), body(body) {}
 
 	void print() const
 	{
 		printf("(ForIter at %zu)\nfor ", position);
-		init.print();
+		init->print();
 		printf(" : ");
-		iter.print();
+		iter->print();
 		printf("\n");
 		body.printBlock();
 	}
 };
 struct While : public Statement // while condition { body }
 {
-	Expression condition;
+	Expression* condition;
 	StatementBlock body;
 
-	While(size_t position, Expression condition, StatementBlock body) : Statement(position), condition(condition), body(body) {}
+	While(size_t position, Expression* condition, StatementBlock body) : Statement(position), condition(condition), body(body) {}
 
 	void print() const
 	{
 		printf("(While at %zu)\nwhile ", position);
-		condition.print();
+		condition->print();
 		printf("\n");
 		body.printBlock();
 	}
 };
 struct Return : public Statement // return value;
 {
-	Expression value;
+	Expression* value;
 
-	Return(size_t position, Expression value) : Statement(position), value(value) {}
+	Return(size_t position, Expression* value) : Statement(position), value(value) {}
 
 	void print() const
 	{
 		printf("(Return at %zu)\nreturn ", position);
-		value.print();
+		value->print();
 		printf(";\n");
 	}
 };
@@ -300,14 +300,14 @@ struct Continue : public Statement // continue;
 struct Assign : public Statement // Assign a value to a variable, a = 1293; a += 12; a++;
 {
 	string name;
-	Expression value;
+	Expression* value;
 
-	Assign(size_t position, string name, Expression value) : Statement(position), name(name), value(value) {}
+	Assign(size_t position, string name, Expression* value) : Statement(position), name(name), value(value) {}
 
 	void print() const
 	{
 		printf("(Assign at %zu)\n%s = ", position, name.c_str());
-		value.print();
+		value->print();
 		printf(";\n");
 	}
 };
@@ -342,91 +342,90 @@ struct ExpressionStatement : public Statement // Simple expression by themself e
 		printf(";\n");
 	}
 };
-struct BinaryExpression : public Expression // Simple arithmetics actions: left [op] right; (op + - * / % ^)
+struct BinaryExpression : public Expression // Simple arithmetics actions: left [op] right; (+ - * / % ^ == != < > <= >=) e.g. a + b;
 {
-	Expression left;
-	Expression right;
+	Expression* left;
+	Expression* right;
 	operators op;
 
-	BinaryExpression(size_t position, Expression left, operators op, Expression right) : Expression(position), left(left), right(right), op(op) {}
+	BinaryExpression(size_t position, Expression* left, operators op, Expression* right) : Expression(position), left(left), right(right), op(op) {}
 
 	void print() const
 	{
-		printf("(BinaryExpression at %zu)\n", position);
-		left.print();
+		printf("(BinaryExpression at %zu) ", position);
+		left->print();
 		printf(" %s ", getStringFromId(uenum(op)).c_str());
-		right.print();
-		printf(";\n");
+		right->print();
+		printf("\n");
 	}
 };
-struct UnaryExpression : public Expression // negative/positive/not: -value, !value
+struct UnaryExpression : public Expression // negative/positive/not: -value, !value // Maybe add ~
 {
-	Expression value;
+	Expression* value;
 	operators op;
 
-	UnaryExpression(size_t position, operators op, Expression value) : Expression(position), value(value), op(op) {}
+	UnaryExpression(size_t position, operators op, Expression* value) : Expression(position), value(value), op(op) {}
 
 	void print() const
 	{
-		printf("(UnaryExpression at %zu)\n", position);
+		printf("(UnaryExpression at %zu) ", position);
 		printf("%s", getStringFromId(uenum(op)).c_str());
-		value.print();
-		printf(";\n");
+		value->print();
+		printf("\n");
 	}
 };
 struct TernaryExpression : public Expression // condition ? true : false
 {
-	Expression condition;
-	Expression true_value;
-	Expression false_value;
+	Expression* condition;
+	Expression* true_value;
+	Expression* false_value;
 
-	TernaryExpression(size_t position, Expression condition, Expression true_value, Expression false_value) : Expression(position), condition(condition), true_value(true_value), false_value(false_value) {}
+	TernaryExpression(size_t position, Expression* condition, Expression* true_value, Expression* false_value) : Expression(position), condition(condition), true_value(true_value), false_value(false_value) {}
 
 	void print() const
 	{
-		printf("(TernaryExpression at %zu)\n", position);
-		condition.print();
+		printf("(TernaryExpression at %zu) ", position);
+		condition->print();
 		printf(" ? ");
-		true_value.print();
+		true_value->print();
 		printf(" : ");
-		false_value.print();
-		printf(";\n");
+		false_value->print();
+		printf("\n");
 	}
 };
 struct FunctionCallExpression : public Expression // Call a function (return something maybe null): name(args);
 {
 	string name;
-	vector<Expression> args;
+	vector<Expression*> args;
 
-	FunctionCallExpression(size_t position, string name, vector<Expression> args) : Expression(position), name(name), args(args) {}
+	FunctionCallExpression(size_t position, string name, vector<Expression*> args) : Expression(position), name(name), args(args) {}
 
 	void print() const
 	{
-		printf("(FunctionCallExpression at %zu)\n", position);
+		printf("(FunctionCallExpression at %zu) ", position);
 		printf("%s(", name.c_str());
 		for (auto& arg : args)
 		{
-			arg.print();
+			arg->print();
 			printf(", ");
 		}
-		printf(");\n");
+		printf(")\n");
 	}
 };
 struct ArrayAccessExpression : public Expression // Access array element: array[index]
 {
-	Expression array;
-	Expression index;
+	Expression* array;
+	Expression* index;
 
-	ArrayAccessExpression(size_t position, Expression array, Expression index) : Expression(position), array(array), index(index) {}
+	ArrayAccessExpression(size_t position, Expression* array, Expression* index) : Expression(position), array(array), index(index) {}
 
 	void print() const
 	{
-		printf("(ArrayAccessExpression at %zu)\n", position);
-		array.print();
+		printf("(ArrayAccessExpression at %zu) ", position);
+		array->print();
 		printf("[");
-		index.print();
-		printf("]");
-		printf(";\n");
+		index->print();
+		printf("]\n");
 	}
 };
 struct IdentifierExpression : public Expression // Access Variable: name
@@ -437,28 +436,26 @@ struct IdentifierExpression : public Expression // Access Variable: name
 
 	void print() const
 	{
-		printf("(IdentifierExpression at %zu)\n", position);
-		printf("%s", name.c_str());
-		printf(";\n");
+		printf("(IdentifierExpression at %zu) ", position);
+		printf("%s\n", name.c_str());
 	}
 };
 struct ArrayLiteralExpression : public Expression // Array literal: [1, 2, 3], [0:10:1]
 {
-	vector<Expression> values;
+	vector<Expression*> values;
 
-	ArrayLiteralExpression(size_t position, vector<Expression> values) : Expression(position), values(values) {}
+	ArrayLiteralExpression(size_t position, vector<Expression*> values) : Expression(position), values(values) {}
 
 	void print() const
 	{
-		printf("(ArrayLiteralExpression at %zu)\n", position);
+		printf("(ArrayLiteralExpression at %zu) ", position);
 		printf("[");
 		for (auto& value : values)
 		{
-			value.print();
+			value->print();
 			printf(", ");
 		}
-		printf("]");
-		printf(";\n");
+		printf("]\n");
 	}
 };
 struct StringLiteralExpression : public Expression // String literal: "Hello World"
@@ -469,9 +466,8 @@ struct StringLiteralExpression : public Expression // String literal: "Hello Wor
 
 	void print() const
 	{
-		printf("(StringLiteralExpression at %zu)\n", position);
-		printf("\"%s\"", value.c_str());
-		printf(";\n");
+		printf("(StringLiteralExpression at %zu) ", position);
+		printf("\"%s\"\n", value.c_str());
 	}
 };
 struct NumLiteralExpression : public Expression // Number literal: 12, 0.12, .12, 12.
@@ -482,9 +478,40 @@ struct NumLiteralExpression : public Expression // Number literal: 12, 0.12, .12
 
 	void print() const
 	{
-		printf("(NumLiteralExpression at %zu)\n", position);
-		printf("%f", value);
-		printf(";\n");
+		printf("(NumLiteralExpression at %zu) ", position);
+		printf("%f\n", value);
+	}
+};
+struct BoolLiteralExpression : public Expression // Boolean literal: true, false
+{
+	bool value;
+
+	BoolLiteralExpression(size_t position, bool value) : Expression(position), value(value) {}
+
+	void print() const
+	{
+		printf("(BoolLiteralExpression at %zu) ", position);
+		printf("%s\n", value ? "true" : "false");
+	}
+};
+struct NullLiteralExpression : public Expression // Null literal: null
+{
+	NullLiteralExpression(size_t position) : Expression(position) {}
+
+	void print() const
+	{
+		printf("(NullLiteralExpression at %zu) ", position);
+		printf("null\n");
+	}
+};
+struct EmptyExpression : public Expression // ;
+{
+	EmptyExpression(size_t position) : Expression(position) {}
+
+	void print() const
+	{
+		printf("(EmptyExpression at %zu) ", position);
+		printf("\n");
 	}
 };
 }

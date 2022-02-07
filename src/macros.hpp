@@ -40,6 +40,10 @@ public:
 || (c >= 123 && c <= 126))
 #define GET_JUST_FILENAME(path) path.substr(path.find_last_of('/')+1, path.find_last_of('.')-(path.find_last_of('/')+1))
 
+#define IS_ENUM_KEYWORD(u) (u >= FIRST_KEYWORD_ID && u <= LAST_KEYWORD_ID)
+#define IS_ENUM_VARTYPE(u) (u >= FIRST_VARTYPE_ID && u <= LAST_VARTYPE_ID)
+#define IS_ENUM_OPERATOR(u) (u >= FIRST_OPERATOR_ID && u <= LAST_OPERATOR_ID)
+
 #define MAX_OPERATOR_LENGTH 3
 
 #define ANSI_COLOR_RED     "\x1b[31m"

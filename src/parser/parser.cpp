@@ -17,7 +17,7 @@ void Parser::parse(TokenNode& root)
 	}
 }
 
-void Parser::print()
+void Parser::print() const
 {
 	for (auto& statement : this->program.statements)
 	{
@@ -25,8 +25,13 @@ void Parser::print()
 	}
 }
 
-Nodes::Statement* Parser::parse_statement(TokenNode& tok)
+Nodes::Statement* Parser::parse_statement(TokenNode& tok, int skip) const
 {
+	for (int i = 0; i < skip; i++)
+	{
+		tok = *tok.next;
+	}
+
 	switch(tok.tok.type)
 	{
 		case toktype::TOK_EOF:
@@ -55,16 +60,36 @@ Nodes::Statement* Parser::parse_statement(TokenNode& tok)
 		tok, 1);
 }
 
-Nodes::Statement* Parser::parse_keyword(TokenNode& tok)
+Nodes::Statement* Parser::parse_keyword(TokenNode& tok, int skip) const
 {
+	for (int i = 0; i < skip; i++)
+	{
+		tok = *tok.next;
+	}
+
 	switch (tok.tok.keyword)
 	{
 	case uenum(keywords::IMPORT): 			// -----=====*****\ IMPORT /*****=====-----
 		return parse_import(tok);
 	case uenum(keywords::RETURN): 			// -----=====*****\ RETURN /*****=====-----
-		break;
+		if (tok.next->tok.type == toktype::OPERATOR && tok.next->tok.keyword == uenum(operators::SEMICOLON))
+			return incRet(
+				new Nodes::Return{tok.tok.position, new Nodes::NullLiteralExpression{tok.tok.position}},
+				tok, 2);
+		else if (tok.next->next->tok.type == toktype::OPERATOR && tok.next->next->tok.keyword == uenum(operators::SEMICOLON))
+			return incRet(
+				new Nodes::Return{tok.tok.position, parse_expression(tok, 1)},
+				tok, 1); // skip one in parse_expression and the semicolon afterwards
+		else error(tok, "Expected semicolon after return statement (return <expression>; or return;)");
 	case uenum(keywords::FOR):				// -----=====*****\ FOR /*****=====-----
-		break;
+		Nodes::Statement* init;
+		Nodes::Expression* cond;
+		Nodes::Expression* inc;
+		Nodes::Statement* body;
+		
+		// for init; cond; inc; body || for init : INT body || for init : ITER body
+		init = parse_statement(*tok.next); // Get the init statement
+
 	case uenum(keywords::WHILE): 			// -----=====*****\ WHILE /*****=====-----
 		break;
 	case uenum(keywords::BREAK): 			// -----=====*****\ BREAK /*****=====-----
@@ -101,8 +126,13 @@ Nodes::Statement* Parser::parse_keyword(TokenNode& tok)
 		tok, 1);
 }
 
-Nodes::Expression* Parser::parse_expression(TokenNode& tok)
+Nodes::Expression* Parser::parse_expression(TokenNode& tok, int skip) const
 {
+	for (int i = 0; i < skip; i++)
+	{
+		tok = *tok.next;
+	}
+
 	// TODO: Implement
 
 	return incRet(
@@ -110,8 +140,13 @@ Nodes::Expression* Parser::parse_expression(TokenNode& tok)
 		tok, 1);
 }
 
-Nodes::StatementBlock* Parser::parse_block(TokenNode& tok)
+Nodes::StatementBlock* Parser::parse_block(TokenNode& tok, int skip) const
 {
+	for (int i = 0; i < skip; i++)
+	{
+		tok = *tok.next;
+	}
+
 	Nodes::StatementBlock* block = new Nodes::StatementBlock{tok.tok.position, vector<Nodes::Statement*>()};
 
 	// Make sure we have a '{'
@@ -135,8 +170,13 @@ Nodes::StatementBlock* Parser::parse_block(TokenNode& tok)
 	return block;
 }
 
-inline Nodes::Statement* Parser::parse_import(TokenNode& tok) const
+inline Nodes::Statement* Parser::parse_import(TokenNode& tok, int skip) const
 {
+	for (int i = 0; i < skip; i++)
+	{
+		tok = *tok.next;
+	}
+
 	// import "..."
 	if (tok.next->tok.type == toktype::STRING)
 	{
@@ -197,6 +237,29 @@ inline Nodes::Statement* Parser::parse_import(TokenNode& tok) const
 	}
 	// Throw an error if we don't have an identifier or string after the import
 	else error(tok, "Expected identifier or string after 'import' statement (import ...; / import \"...\";)");
+
+	// We should never reach this point
+	return incRet(
+		new Nodes::Statement{tok.tok.position},
+		tok, 1);
+}
+
+inline Nodes::Statement* Parser::parse_expression_statement(TokenNode& tok, int skip) const
+{
+	for (int i = 0; i < skip; i++)
+	{
+		tok = *tok.next;
+	}
+
+	// expression;
+	if (tok.next->tok.type == toktype::OPERATOR && tok.next->tok.keyword == uenum(operators::SEMICOLON))
+	{
+		return incRet(
+			new Nodes::ExpressionStatement{tok.tok.position, parse_expression(tok)},
+			tok, 2);
+	}
+	// Throw an error if we don't have a semicolon after the expression
+	else error(tok, "Expected ';' after expression statement (expression;)");
 
 	// We should never reach this point
 	return incRet(

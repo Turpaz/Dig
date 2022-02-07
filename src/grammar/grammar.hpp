@@ -22,7 +22,7 @@ enum class toktype : char
 
 enum class keywords : unsigned
 {
-	SETTING_START_VALUE_IGNORE_THIS = 0,
+	__BEGIN = 0,
 	#define KEYWORD(id, str) id,
 	#define VARTYPE(id, str)
 	#define OPERATOR(id, str)
@@ -30,11 +30,11 @@ enum class keywords : unsigned
 	#undef KEYWORD
 	#undef VARTYPE
 	#undef OPERATOR
-	GETTING_COUNT_IGNORE_THIS
+	__END
 };
 enum class vartypes : unsigned
 {
-	SETTING_START_VALUE_IGNORE_THIS = static_cast<unsigned>(keywords::GETTING_COUNT_IGNORE_THIS),
+	__BEGIN = static_cast<unsigned>(keywords::__END),
 	#define KEYWORD(id, str)
 	#define VARTYPE(id, str) id,
 	#define OPERATOR(id, str)
@@ -42,11 +42,11 @@ enum class vartypes : unsigned
 	#undef KEYWORD
 	#undef VARTYPE
 	#undef OPERATOR
-	GETTING_COUNT_IGNORE_THIS
+	__END
 };
 enum class operators : unsigned
 {
-	SETTING_START_VALUE_IGNORE_THIS = static_cast<unsigned>(vartypes::GETTING_COUNT_IGNORE_THIS),
+	__BEGIN = static_cast<unsigned>(vartypes::__END),
 	#define KEYWORD(id, str)
 	#define VARTYPE(id, str)
 	#define OPERATOR(id, str) id,
@@ -54,13 +54,16 @@ enum class operators : unsigned
 	#undef KEYWORD
 	#undef VARTYPE
 	#undef OPERATOR
-	GETTING_COUNT_IGNORE_THIS
+	__END
 };
 
 // tools to differentiate between a keyword, a vartype and an operator
-#define FIRST_KEYWORD_ID static_cast<unsigned>(keywords::SETTING_START_VALUE_IGNORE_THIS + 1)
-#define FIRST_VARTYPE_ID static_cast<unsigned>(vartypes::SETTING_START_VALUE_IGNORE_THIS + 1)
-#define FIRST_OPERATOR_ID static_cast<unsigned>(operators::SETTING_START_VALUE_IGNORE_THIS + 1)
+#define FIRST_KEYWORD_ID (static_cast<unsigned>(keywords::__BEGIN) + 1)
+#define LAST_KEYWORD_ID (static_cast<unsigned>(keywords::__END) - 1)
+#define FIRST_VARTYPE_ID (static_cast<unsigned>(vartypes::__BEGIN) + 1)
+#define LAST_VARTYPE_ID (static_cast<unsigned>(vartypes::__END) - 1)
+#define FIRST_OPERATOR_ID (static_cast<unsigned>(operators::__BEGIN) + 1)
+#define LAST_OPERATOR_ID (static_cast<unsigned>(operators::__END) - 1)
 
 inline constexpr unsigned uenum(keywords k) { return static_cast<unsigned>(k); }
 inline constexpr unsigned uenum(vartypes v) { return static_cast<unsigned>(v); }
