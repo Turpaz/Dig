@@ -311,6 +311,24 @@ struct Assign : public Statement // Assign a value to a variable, a = 1293; a +=
 		printf(";\n");
 	}
 };
+struct RootStatement : public Statement // RootStatement is just the first node
+{
+	RootStatement(size_t position) : Statement(position) {}
+
+	void print() const
+	{
+		printf("(RootStatement at %zu)\n", position);
+	}
+};
+struct EmptyStatement : public Statement // ;
+{
+	EmptyStatement(size_t position) : Statement(position) {}
+
+	void print() const
+	{
+		printf("(EmptyStatement at %zu)\n;\n", position);
+	}
+};
 struct ExpressionStatement : public Statement // Simple expression by themself e.g. a + b; foo();
 {
 	Expression* value;
