@@ -15,16 +15,16 @@ Options:\n\
 \t-E\t\t\tPreprocess only.\n\
 "
 
- // Max 32 command line arguments
- #define CMD_OPTIONS_STRING "o:hve" /* all the options */
+// Max 32 command line arguments
+#define CMD_OPTIONS_STRING "o:hve" /* all the options */
 class cmd_args
 {
 public:
-    static const int None	= 0;
-    static const int _o		= (1 << 0);
-    static const int _h		= (1 << 1);
-    static const int _v		= (1 << 2);
-    static const int _E		= (1 << 3);
+	static const int None	= 0;
+	static const int _o		= (1 << 0);
+	static const int _h		= (1 << 1);
+	static const int _v		= (1 << 2);
+	static const int _E		= (1 << 3);
 };
 
 #define ERROR_WE_DONT_KNOW "Something went horribly wrong, probably a bug in the compiler itself, sorry"
@@ -44,14 +44,38 @@ public:
 #define IS_ENUM_VARTYPE(u) (u >= FIRST_VARTYPE_ID && u <= LAST_VARTYPE_ID)
 #define IS_ENUM_OPERATOR(u) (u >= FIRST_OPERATOR_ID && u <= LAST_OPERATOR_ID)
 
+#define LANG_BIN_OP 0
+#define LANG_UN_OP 1
+#define LANG_BIN_UN_OP 2
+#define LANG_OTHER_OP 3
+
+template <class T, class Instance> inline bool IsType(const Instance* src)
+{
+	return dynamic_cast<const T*>(src) != nullptr;
+}
+
+#define CAN_BE_EXPRESSION(tok) \
+		(tok.tok.type == toktype::IDENTIFIER || \
+		tok.tok.type == toktype::STRING || \
+		tok.tok.type == toktype::NUM || \
+		(tok.tok.type == toktype::OPERATOR && \
+		(isBinOp(tok.tok.keyword) || isUnOp(tok.tok.keyword)) || \
+		tok.tok.keyword == uenum(operators::ASS)  || \
+		tok.tok.keyword == uenum(operators::LBRACK) || tok.tok.keyword == uenum(operators::LPAREN)) || \
+		(tok.tok.type == toktype::KEYWORD && \
+		((tok.tok.keyword == uenum(keywords::TRUE) || tok.tok.keyword == uenum(keywords::FALSE) || tok.tok.keyword == uenum(keywords::_NULL)))\
+		|| IS_ENUM_VARTYPE(tok.tok.keyword)) \
+		)
+
 #define MAX_OPERATOR_LENGTH 3
 
-#define ANSI_COLOR_RED     "\x1b[31m"
-#define ANSI_COLOR_GREEN   "\x1b[32m"
-#define ANSI_COLOR_YELLOW  "\x1b[33m"
-#define ANSI_COLOR_BLUE    "\x1b[34m"
-#define ANSI_COLOR_MAGENTA "\x1b[35m"
-#define ANSI_COLOR_CYAN    "\x1b[36m"
-#define ANSI_COLOR_RESET   "\x1b[0m"
+#define COLOR_RED   "\x1B[31m"
+#define COLOR_GREEN   "\x1B[32m"
+#define COLOR_YELLOW   "\x1B[33m"
+#define COLOR_BLUE   "\x1B[34m"
+#define COLOR_MAGENTA   "\x1B[35m"
+#define COLOR_CYAN   "\x1B[36m"
+#define COLOR_WHITE   "\x1B[37m"
+#define COLOR_RESET "\x1B[0m"
 
 #endif // MACROS_HPP

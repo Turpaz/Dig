@@ -56,7 +56,7 @@ struct StatementBlock : public Statement // A block of statements { ... }
 
 	void printBlock() const
 	{
-		printf("{");
+		printf("{\n");
 		for (auto& statement : statements)
 		{
 			printf("\t");
@@ -68,19 +68,19 @@ struct StatementBlock : public Statement // A block of statements { ... }
 struct Ite : public Statement // if condition { ifBranch } else { elseBranch }
 {
 	Expression* condition;
-	StatementBlock ifBranch;
-	StatementBlock elseBranch;
+	StatementBlock* ifBranch;
+	StatementBlock* elseBranch;
 
-	Ite(size_t position, Expression* condition, StatementBlock ifBranch, StatementBlock elseBranch) : Statement(position), condition(condition), ifBranch(ifBranch), elseBranch(elseBranch) {}
+	Ite(size_t position, Expression* condition, StatementBlock* ifBranch, StatementBlock* elseBranch) : Statement(position), condition(condition), ifBranch(ifBranch), elseBranch(elseBranch) {}
 
 	void print() const
 	{
 		printf("(Ite at %zu)\nif ", position);
 		condition->print();
 		printf("\n");
-		ifBranch.printBlock();
+		ifBranch->printBlock();
 		printf("else\n");
-		elseBranch.printBlock();
+		elseBranch->printBlock();
 	}
 };
 struct VarDecl : public Statement // type name = value; type name;
@@ -103,21 +103,23 @@ struct FunctionDecl : public Statement // fun name(args) { body }
 	string name;
 	map<pair<vartypes, string>, Expression*> args;
 	vartypes rType; // if not specified, it is set to vartypes::VAR
-	StatementBlock body;
+	StatementBlock* body;
 
-	FunctionDecl(size_t position, string name, map<pair<vartypes, string>, Expression*> args, vartypes rType, StatementBlock body) : Statement(position), name(name), args(args), rType(rType), body(body) {}
+	FunctionDecl(size_t position, string name, map<pair<vartypes, string>, Expression*> args, vartypes rType, StatementBlock* body) : Statement(position), name(name), args(args), rType(rType), body(body) {}
 
 	void print() const
 	{
 		printf("(FunctionDecl at %zu)\nfun %s(", position, name.c_str());
+
+		if (!args.empty()) printf("\n  ");
 		for (auto& arg : args)
 		{
 			printf("%s %s = ", getStringFromId(uenum(arg.first.first)).c_str(), arg.first.second.c_str());
 			arg.second->print();
 			printf(", ");
 		}
-		printf(")\n");
-		body.printBlock();
+		printf(") : %s\n", getStringFromId(uenum(rType)).c_str());
+		body->printBlock();
 	}
 };
 struct ClassSysFunctionDecl : public Statement
@@ -125,9 +127,9 @@ struct ClassSysFunctionDecl : public Statement
 	string name; // initialize, terminate, __str__, __OP_PLUS__, etc.
 	map<pair<vartypes, string>, Expression*> args;
 	vartypes rType;
-	StatementBlock body;
+	StatementBlock* body;
 
-	ClassSysFunctionDecl(size_t position, string name, map<pair<vartypes, string>, Expression*> args, vartypes rType, StatementBlock body) : Statement(position), name(name), args(args), rType(rType), body(body) {}
+	ClassSysFunctionDecl(size_t position, string name, map<pair<vartypes, string>, Expression*> args, vartypes rType, StatementBlock* body) : Statement(position), name(name), args(args), rType(rType), body(body) {}
 
 	void print() const
 	{
@@ -139,17 +141,17 @@ struct ClassSysFunctionDecl : public Statement
 			printf(", ");
 		}
 		printf(")\n");
-		body.printBlock();
+		body->printBlock();
 	}
 };
 struct ClassDecl : public Statement // class name { body }
 {
 	string name; // TODO: add inheritance
-	map<VarDecl, Access> members;
-	map<FunctionDecl, Access> functions;
-	vector<ClassSysFunctionDecl> sysFunctions; // All public functions, initialize, terminate, __str__, __OP_PLUS__, etc.
+	map<VarDecl*, Access> members;
+	map<FunctionDecl*, Access> functions;
+	vector<ClassSysFunctionDecl*> sysFunctions; // All public functions, initialize, terminate, __str__, __OP_PLUS__, etc.
 
-	ClassDecl(size_t position, string name, map<VarDecl, Access> members, map<FunctionDecl, Access> functions, vector<ClassSysFunctionDecl> sysFunctions) : Statement(position), name(name), members(members), functions(functions), sysFunctions(sysFunctions) {}
+	ClassDecl(size_t position, string name, map<VarDecl*, Access> members, map<FunctionDecl*, Access> functions, vector<ClassSysFunctionDecl*> sysFunctions) : Statement(position), name(name), members(members), functions(functions), sysFunctions(sysFunctions) {}
 
 	void print() const
 	{
@@ -157,18 +159,18 @@ struct ClassDecl : public Statement // class name { body }
 		for (auto& member : members)
 		{
 			printf("\t");
-			member.first.print();
+			member.first->print();
 		}
 		for (auto& function : functions)
 		{
 			printf("\t");
-			function.first.print();
+			function.first->print();
 			printf("\n");
 		}
 		for (auto& function : sysFunctions)
 		{
 			printf("\t");
-			function.print();
+			function->print();
 			printf("\n");
 		}
 		printf("}\n");
@@ -177,14 +179,14 @@ struct ClassDecl : public Statement // class name { body }
 struct NamespaceDecl : public Statement // namespace name { body }
 {
 	string name;
-	StatementBlock body;
+	StatementBlock* body;
 
-	NamespaceDecl(size_t position, string name, StatementBlock body) : Statement(position), name(name), body(body) {}
+	NamespaceDecl(size_t position, string name, StatementBlock* body) : Statement(position), name(name), body(body) {}
 
 	void print() const
 	{
 		printf("(NamespaceDecl at %zu)\nnamespace %s\n", position, name.c_str());
-		body.printBlock();
+		body->printBlock();
 	}
 };
 struct For : public Statement /* for init; condition; step e.g. for int i; i < 10; i++ { ... } */
@@ -298,20 +300,6 @@ struct Continue : public Statement // continue;
 		printf("(Continue at %zu)\ncontinue;\n", position);
 	}
 };
-struct Assign : public Statement // Assign a value to a variable, a = 1293; a += 12; a++;
-{
-	string name;
-	Expression* value;
-
-	Assign(size_t position, string name, Expression* value) : Statement(position), name(name), value(value) {}
-
-	void print() const
-	{
-		printf("(Assign at %zu)\n%s = ", position, name.c_str());
-		value->print();
-		printf(";\n");
-	}
-};
 struct RootStatement : public Statement // RootStatement is just the first node
 {
 	RootStatement(size_t position) : Statement(position) {}
@@ -357,10 +345,23 @@ struct BinaryExpression : public Expression // Simple arithmetics actions: left 
 		left->print();
 		printf(" %s ", getStringFromId(uenum(op)).c_str());
 		right->print();
-		printf("\n");
 	}
 };
-struct UnaryExpression : public Expression // negative/positive/not: -value, !value // Maybe add ~
+struct AssignExpression : public Expression // Assign a value to a variable, a = 1293; a += 12; a++;
+{
+	string name;
+	Expression* value;
+
+	AssignExpression(size_t position, string name, Expression* value) : Expression(position), name(name), value(value) {}
+
+	void print() const
+	{
+		printf("(Assign at %zu)\n%s = ", position, name.c_str());
+		value->print();
+		printf(";\n");
+	}
+};
+struct UnaryExpression : public Expression // negative/not: -value, !value // Maybe add ~
 {
 	Expression* value;
 	operators op;
@@ -373,6 +374,20 @@ struct UnaryExpression : public Expression // negative/positive/not: -value, !va
 		printf("%s", getStringFromId(uenum(op)).c_str());
 		value->print();
 		printf("\n");
+	}
+};
+struct ParenthesisExpression : public Expression // (value)
+{
+	Expression* value;
+
+	ParenthesisExpression(size_t position, Expression* value) : Expression(position), value(value) {}
+
+	void print() const
+	{
+		printf("(ParenthesisExpression at %zu) ", position);
+		printf("( ");
+		value->print();
+		printf(" )\n");
 	}
 };
 struct TernaryExpression : public Expression // condition ? true : false
@@ -413,13 +428,13 @@ struct FunctionCallExpression : public Expression // Call a function (return som
 		printf(")\n");
 	}
 };
-struct VerDeclExpression : public Expression // VerDecl is a variable declaration
+struct VarDeclExpression : public Expression // VerDecl is a variable declaration
 {
 	vartypes type;
 	string name;
 	Expression* value; // if value is not specified, it is set to default (0, "", etc.)
 
-	VerDeclExpression(size_t position, vartypes type, string name, Expression* value) : Expression(position), type(type), name(name), value(value) {}
+	VarDeclExpression(size_t position, vartypes type, string name, Expression* value) : Expression(position), type(type), name(name), value(value) {}
 
 	void print() const
 	{
@@ -467,10 +482,10 @@ struct IdentifierExpression : public Expression // Access Variable: name
 	void print() const
 	{
 		printf("(IdentifierExpression at %zu) ", position);
-		printf("%s\n", name.c_str());
+		printf("%s", name.c_str());
 	}
 };
-struct ArrayLiteralExpression : public Expression // Array literal: [1, 2, 3], [0:10:1]
+struct ArrayLiteralExpression : public Expression // Array literal: [1, 2, 3]
 {
 	vector<Expression*> values;
 
@@ -485,6 +500,26 @@ struct ArrayLiteralExpression : public Expression // Array literal: [1, 2, 3], [
 			value->print();
 			printf(", ");
 		}
+		printf("]\n");
+	}
+};
+struct RangeArrayLiteralExpression : public Expression // Range array literal: [0:10:1]
+{
+	Expression* start;
+	Expression* end;
+	Expression* step;
+
+	RangeArrayLiteralExpression(size_t position, Expression* start, Expression* end, Expression* step) : Expression(position), start(start), end(end), step(step) {}
+
+	void print() const
+	{
+		printf("(RangeArrayLiteralExpression at %zu) ", position);
+		printf("[");
+		start->print();
+		printf(":");
+		end->print();
+		printf(":");
+		step->print();
 		printf("]\n");
 	}
 };
@@ -544,6 +579,25 @@ struct EmptyExpression : public Expression // ;
 		printf("\n");
 	}
 };
+
+inline Expression* getDefaultValueForType(vartypes type, size_t pos)
+{
+	switch (type)
+	{
+	case vartypes::BOOL:
+		return new BoolLiteralExpression{pos, false};
+	case vartypes::INT: case vartypes::FLOAT:
+		return new NumLiteralExpression{pos, 0};
+	case vartypes::STR:
+		return new StringLiteralExpression{pos, ""};
+	case vartypes::VAR:
+		return new NullLiteralExpression{pos};
+	case vartypes::ARR:
+		return new ArrayLiteralExpression{pos, {}};
+	default:
+		return new NullLiteralExpression{pos};
+	}
+}
 }
 
 #endif // PARSER_TREE_HPP

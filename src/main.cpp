@@ -65,16 +65,15 @@ int main(int argc, char** argv)
 	Parser parser(&lexer);
 	//Transpiler transpiler;
 
-	printf("Starting Lexing proccess...\n");
-
 	TokenNode* root = new TokenNode();
 	Token tok;
 	while (lexer.get_token(tok))
 	{
 		root->add_child(tok);
 	}
+	root->add_child(Token());
 
-	printf("Starting Parsing proccess...\n");
+	// root->print();
 
 	parser.parse(*root);
 

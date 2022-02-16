@@ -23,22 +23,26 @@ public:
 	Token(size_t position) : type(toktype::TOK_EOF), position(position) {}
 	Token() : type(toktype::TOK_EOF), str(""), num(0), position(-1) {}
 
-	void print()
+	string tostr() const
 	{
 		if (type == toktype::IDENTIFIER || type == toktype::STRING)
-			printf("(\"%s\" : %s) at %zu\n", str.c_str(), type == toktype::STRING ? "STRING" : "IDENTIFIER", position);
+			return string("(\"" + str + "\" : " + (type == toktype::STRING ? "STRING" : "IDENTIFIER") + ") at " + std::to_string(position));
 		else if (type == toktype::NUM)
-			printf("(%f : NUM) at %zu\n", num, position);
+			return string("(" + std::to_string(num) + " : NUM) at " + std::to_string(position));
 		else if (type == toktype::KEYWORD)
-			printf("(%s : KEYWORD) at %zu\n", getStringFromId(keyword).c_str(), position);
+			return string("(" + getStringFromId(keyword) + " : KEYWORD) at " + std::to_string(position));
 		else if (type == toktype::OPERATOR)
-			printf("(%s : OPERATOR) at %zu\n", getStringFromId(keyword).c_str(), position);
+			return string("(" + getStringFromId(keyword) + " : OPERATOR) at " + std::to_string(position));
 		else if (type == toktype::TOK_EOF)
-			printf("(EOF : EOF) at %zu\n", position);
+			return string("(EOF : EOF) at " + std::to_string(position));
 		else if (type == toktype::ROOT)
-			printf("(ROOT : ROOT) at %zu\n", position);
-		else
-			printf("(\"\" : ERROR_TYPE) at %zu\n", position);
+			return string("(ROOT : ROOT) at " + std::to_string(position));
+		return string("(\"\" : ERROR_TYPE) at " + std::to_string(position));
+	}
+
+	void print()
+	{
+		printf("%s\n", tostr().c_str());
 	}
 private:
 };

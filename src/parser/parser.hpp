@@ -1,6 +1,7 @@
 #ifndef PARSER_PARSER_HPP
 #define PARSER_PARSER_HPP
 
+#include <iostream>
 #include "tree.hpp"
 #include "../grammar/grammar.hpp"
 #include "../lexer/lexer.hpp"

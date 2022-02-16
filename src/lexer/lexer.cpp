@@ -177,7 +177,7 @@ Token Lexer::parse_operator()
 	{
 		#define KEYWORD(id, str)
 		#define VARTYPE(id, str)
-		#define OPERATOR(id, str) if (v == str) return Token(toktype::OPERATOR, static_cast<unsigned>(operators::id), index);
+		#define OPERATOR(id, str, type) if (v == str) return Token(toktype::OPERATOR, static_cast<unsigned>(operators::id), index);
 		#include "../grammar/language.inc"
 		#undef KEYWORD
 		#undef VARTYPE
@@ -279,6 +279,14 @@ void Lexer::error(const char* format, ...)
 
 void Lexer::error(size_t at, const char* format, ...)
 {
+	va_list args;
+	va_start(args, format);
+	this->error(at, format, args);
+	va_end(args);
+}
+
+void Lexer::error(size_t at, const char* format, va_list args)
+{
 	size_t lineNumber = 1;
 	size_t characterNumberInLine = 1;
 	const char* j;
@@ -291,13 +299,11 @@ void Lexer::error(size_t at, const char* format, ...)
 	for (jj = j; *jj != '\n' && jj > src; jj--) ;
 	// calculate the column
 	characterNumberInLine = j - jj;
+	// FIXME: not generating column correctly
 	
-	fprintf(stderr, "%s:%zu:%zu " ANSI_COLOR_RED "error: " ANSI_COLOR_RESET, path.c_str(), lineNumber, characterNumberInLine);
+	fprintf(stderr, "%s:%zu:%zu " COLOR_RED "error: " COLOR_RESET, path.c_str(), lineNumber, characterNumberInLine);
 
-	va_list args;
-	va_start(args, format);
 	vfprintf(stderr, format, args);
-	va_end(args);
 
 	fprintf(stderr, "\n");
 
@@ -314,6 +320,14 @@ void Lexer::warning(const char* format, ...)
 
 void Lexer::warning(size_t at, const char* format, ...)
 {
+	va_list args;
+	va_start(args, format);
+	this->warning(at, format, args);
+	va_end(args);
+}
+
+void Lexer::warning(size_t at, const char* format, va_list args)
+{
 	size_t lineNumber = 1;
 	size_t characterNumberInLine = 1;
 	const char* j;
@@ -327,12 +341,9 @@ void Lexer::warning(size_t at, const char* format, ...)
 	// calculate the column
 	characterNumberInLine = j - jj;
 	
-	fprintf(stderr, "%s:%zu:%zu " ANSI_COLOR_MAGENTA "warning: " ANSI_COLOR_RESET, path.c_str(), lineNumber, characterNumberInLine);
+	fprintf(stderr, "%s:%zu:%zu " COLOR_MAGENTA "warning: " COLOR_RESET, path.c_str(), lineNumber, characterNumberInLine);
 
-	va_list args;
-	va_start(args, format);
 	vfprintf(stderr, format, args);
-	va_end(args);
 
 	fprintf(stderr, "\n");
 }

@@ -1,4 +1,5 @@
 CPP :=g++
+GDB :=gdb
 TARGET :=../bin/dig.exe
 LDFLAGS :=
 SOURCES := $(shell find . -name "*.cpp")
@@ -13,6 +14,11 @@ all:
 test:
 	$(TARGET) $(TEST_CODE) -o $(TEST_TARGET)
 #	$(TEST_TARGET)
+
+g:
+	$(CPP) $(LDFLAGS) $(CFLAGS) -g -o $(TARGET) $(SOURCES)
+gdb:
+	$(GDB) $(TARGET)
 
 clean:
 	del $(TARGET)

@@ -1,8 +1,9 @@
 #ifndef GRAMMAR_HPP
 #define GRAMMAR_HPP
 
-#include <string>
+#include "../macros.hpp"
 #include <vector>
+#include <string>
 
 using std::string;
 
@@ -25,7 +26,7 @@ enum class keywords : unsigned
 	__BEGIN = 0,
 	#define KEYWORD(id, str) id,
 	#define VARTYPE(id, str)
-	#define OPERATOR(id, str)
+	#define OPERATOR(id, str, type)
 	#include "language.inc"
 	#undef KEYWORD
 	#undef VARTYPE
@@ -37,7 +38,7 @@ enum class vartypes : unsigned
 	__BEGIN = static_cast<unsigned>(keywords::__END),
 	#define KEYWORD(id, str)
 	#define VARTYPE(id, str) id,
-	#define OPERATOR(id, str)
+	#define OPERATOR(id, str, type)
 	#include "language.inc"
 	#undef KEYWORD
 	#undef VARTYPE
@@ -49,7 +50,7 @@ enum class operators : unsigned
 	__BEGIN = static_cast<unsigned>(vartypes::__END),
 	#define KEYWORD(id, str)
 	#define VARTYPE(id, str)
-	#define OPERATOR(id, str) id,
+	#define OPERATOR(id, str, type) id,
 	#include "language.inc"
 	#undef KEYWORD
 	#undef VARTYPE
@@ -72,5 +73,10 @@ inline constexpr char cenum(toktype t) { return static_cast<char>(t); }
 
 unsigned getKeywordOrVartypeFromString(string s);
 string getStringFromId(unsigned i);
+
+bool isBinOp(unsigned int u);
+bool isUnOp(unsigned int u);
+
+double getValueForDoubleOp(unsigned binOp);
 
 #endif // GRAMMAR_HPP

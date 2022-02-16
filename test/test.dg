@@ -2,7 +2,7 @@ import math;
 import math as m;
 import "../path/to/file.dg";
 
-fun foo(int a, b) : int // default return type is var // default parameter type is var
+fun foo(int a, b) : int
 {
 	return a + b;
 }
@@ -11,19 +11,17 @@ fun main()
 {
 	int a = 12;
 	float b = -43.5 * 0b0010 + 0xff;
-	
-	// Comment!
-
-	/*
-		Another Comment!
-	*/
 
 	if a > 6
 	{
 		for int i : 5
 		{
-			a += b;
+			a += b; // TODO: problem is that errors always show the column as 0 
 		}
+	}
+	elif a < 6
+	{
+		print("a is less than 6");
 	}
 
 	print("a = ", a);
