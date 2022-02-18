@@ -77,7 +77,7 @@ int main(int argc, char** argv)
 
 	parser.parse(*root);
 
-	parser.print();
+	// parser.print();
 
 	return 0;
 }

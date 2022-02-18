@@ -7,6 +7,10 @@ Parser::Parser(Lexer* lexer)
 
 void Parser::parse(TokenNode& root)
 {
+	// TODO: Add a validator to check things like if a function is defined twice
+	// or if a referenced variable is not defined. also validate function calls argument count and types.
+	// also validate if a variable is used before it is defined. and so on.
+
 	// Parse until we reach the end of the file
 	while ( root.tok.type != toktype::TOK_EOF )
 	{

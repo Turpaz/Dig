@@ -29,6 +29,8 @@ struct Statement
 	Statement() : position(-1) {};
 
 	virtual void print() const { printf("Statement at %zu\n", position); }
+
+	virtual string codegen() const { return "; Just a Statement"; }
 };
 struct Expression
 {
@@ -37,6 +39,8 @@ struct Expression
 	Expression() : position(-1) {};
 	
 	virtual void print() const { printf("Expression at %zu\n", position); }
+
+	virtual string codegen() const { return "; Just an Expression"; }
 };
 
 struct StatementBlock : public Statement // A block of statements { ... }
@@ -82,6 +86,8 @@ struct Ite : public Statement // if condition { ifBranch } else { elseBranch }
 		printf("else\n");
 		elseBranch->printBlock();
 	}
+
+	string codegen() const { return "; Just an Ite"; }
 };
 struct VarDecl : public Statement // type name = value; type name;
 {
