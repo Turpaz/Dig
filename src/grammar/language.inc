@@ -21,6 +21,7 @@ VARTYPE(FLOAT, "float")
 VARTYPE(BOOL, "bool")
 VARTYPE(STR, "str")
 VARTYPE(ARR, "arr")
+VARTYPE(CONST, "const")
 VARTYPE(VAR, "var") /* a bit like auto but better, also dynamic */
 
 OPERATOR(PLUS, "+", LANG_BIN_OP)

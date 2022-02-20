@@ -30,7 +30,7 @@ struct Statement
 
 	virtual void print() const { printf("Statement at %zu\n", position); }
 
-	virtual string codegen() const { return "; Just a Statement"; }
+	virtual void codegen(Codegen& codegen) const;
 };
 struct Expression
 {
@@ -40,7 +40,7 @@ struct Expression
 	
 	virtual void print() const { printf("Expression at %zu\n", position); }
 
-	virtual string codegen() const { return "; Just an Expression"; }
+	// virtual string codegen() const { return "; Just an Expression"; }
 };
 
 struct StatementBlock : public Statement // A block of statements { ... }
@@ -68,6 +68,8 @@ struct StatementBlock : public Statement // A block of statements { ... }
 		}
 		printf("}\n");
 	}
+
+	void codegen(Codegen& codegen) const;
 };
 struct Ite : public Statement // if condition { ifBranch } else { elseBranch }
 {
@@ -87,7 +89,7 @@ struct Ite : public Statement // if condition { ifBranch } else { elseBranch }
 		elseBranch->printBlock();
 	}
 
-	string codegen() const { return "; Just an Ite"; }
+	void codegen(Codegen& codegen) const;
 };
 struct VarDecl : public Statement // type name = value; type name;
 {
@@ -103,6 +105,8 @@ struct VarDecl : public Statement // type name = value; type name;
 		value->print();
 		printf(";\n");
 	}
+
+	void codegen(Codegen& codegen) const;
 };
 struct FunctionDecl : public Statement // fun name(args) { body }
 {
@@ -127,6 +131,8 @@ struct FunctionDecl : public Statement // fun name(args) { body }
 		printf(") : %s\n", getStringFromId(uenum(rType)).c_str());
 		body->printBlock();
 	}
+
+	void codegen(Codegen& codegen) const;
 };
 struct ClassSysFunctionDecl : public Statement
 {
@@ -149,6 +155,8 @@ struct ClassSysFunctionDecl : public Statement
 		printf(")\n");
 		body->printBlock();
 	}
+
+	void codegen(Codegen& codegen) const;
 };
 struct ClassDecl : public Statement // class name { body }
 {
@@ -181,6 +189,8 @@ struct ClassDecl : public Statement // class name { body }
 		}
 		printf("}\n");
 	}
+
+	void codegen(Codegen& codegen) const;
 };
 struct NamespaceDecl : public Statement // namespace name { body }
 {
@@ -194,6 +204,8 @@ struct NamespaceDecl : public Statement // namespace name { body }
 		printf("(NamespaceDecl at %zu)\nnamespace %s\n", position, name.c_str());
 		body->printBlock();
 	}
+
+	void codegen(Codegen& codegen) const;
 };
 struct For : public Statement /* for init; condition; step e.g. for int i; i < 10; i++ { ... } */
 {
@@ -215,6 +227,8 @@ struct For : public Statement /* for init; condition; step e.g. for int i; i < 1
 		printf("\n");
 		body->printBlock();
 	}
+
+	void codegen(Codegen& codegen) const;
 };
 struct ForIter : public Statement // for init : iterOrNum { body } e.g: for int i : [0:10:1] { ... }, for int i : 10 { ... }
 {
@@ -233,6 +247,8 @@ struct ForIter : public Statement // for init : iterOrNum { body } e.g: for int 
 		printf("\n");
 		body->printBlock();
 	}
+
+	void codegen(Codegen& codegen) const;
 };
 struct While : public Statement // while condition { body }
 {
@@ -248,6 +264,8 @@ struct While : public Statement // while condition { body }
 		printf("\n");
 		body->printBlock();
 	}
+
+	void codegen(Codegen& codegen) const;
 };
 struct Return : public Statement // return value;
 {
@@ -261,6 +279,8 @@ struct Return : public Statement // return value;
 		value->print();
 		printf(";\n");
 	}
+
+	void codegen(Codegen& codegen) const;
 };
 struct ImportModule : public Statement // import math; import random as rdm; TODO: maybe add a way to import a specific function or class from the library
 {
@@ -274,6 +294,8 @@ struct ImportModule : public Statement // import math; import random as rdm; TOD
 		printf("(ImportModule at %zu)\nimport %s", position, name.c_str());
 		printf(" as %s;\n", as.c_str());
 	}
+
+	void codegen(Codegen& codegen) const;
 };
 struct ImportFile : public Statement // import "src/file.dg"; import "constatnts.dg" as consts; TODO: maybe add a way to import a specific function or class from the file
 {
@@ -287,6 +309,8 @@ struct ImportFile : public Statement // import "src/file.dg"; import "constatnts
 		printf("(ImportFile at %zu)\nimport \"%s\"", position, path.c_str());
 		printf(" as %s;\n", as.c_str());
 	}
+
+	void codegen(Codegen& codegen) const;
 };
 struct Break : public Statement // break;
 {
@@ -296,6 +320,8 @@ struct Break : public Statement // break;
 	{
 		printf("(Break at %zu)\nbreak;\n", position);
 	}
+
+	void codegen(Codegen& codegen) const;
 };
 struct Continue : public Statement // continue;
 {
@@ -305,6 +331,8 @@ struct Continue : public Statement // continue;
 	{
 		printf("(Continue at %zu)\ncontinue;\n", position);
 	}
+
+	void codegen(Codegen& codegen) const;
 };
 struct RootStatement : public Statement // RootStatement is just the first node
 {
@@ -314,6 +342,19 @@ struct RootStatement : public Statement // RootStatement is just the first node
 	{
 		printf("(RootStatement at %zu)\n", position);
 	}
+
+	void codegen(Codegen& codegen) const;
+};
+struct EofStatement : public Statement // EofStatement is just the last node
+{
+	EofStatement(size_t position) : Statement(position) {}
+
+	void print() const
+	{
+		printf("(EofStatement at %zu)\n", position);
+	}
+
+	void codegen(Codegen& codegen) const;
 };
 struct EmptyStatement : public Statement // ;
 {
@@ -323,6 +364,8 @@ struct EmptyStatement : public Statement // ;
 	{
 		printf("(EmptyStatement at %zu)\n;\n", position);
 	}
+
+	void codegen(Codegen& codegen) const;
 };
 struct ExpressionStatement : public Statement // Simple expression by themself e.g. a + b; foo();
 {
@@ -336,6 +379,8 @@ struct ExpressionStatement : public Statement // Simple expression by themself e
 		value->print();
 		printf(";\n");
 	}
+
+	void codegen(Codegen& codegen) const;
 };
 struct BinaryExpression : public Expression // Simple arithmetics actions: left [op] right; (+ - * / % ^ == != < > <= >=) e.g. a + b;
 {

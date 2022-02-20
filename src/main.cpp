@@ -1,6 +1,6 @@
 #include "lexer/lexer.hpp"
 #include "parser/parser.hpp"
-#include "transpiler/transpiler.hpp"
+#include "codegen/codegen.hpp"
 #include "preprocessor/preprocessor.hpp"
 
 #include <string>
@@ -63,7 +63,7 @@ int main(int argc, char** argv)
 
 	Lexer lexer(src, path);
 	Parser parser(&lexer);
-	//Transpiler transpiler;
+	Codegen codegen(&parser, output_file);
 
 	TokenNode* root = new TokenNode();
 	Token tok;
@@ -78,6 +78,10 @@ int main(int argc, char** argv)
 	parser.parse(*root);
 
 	// parser.print();
+
+	codegen.generate();
+
+	codegen.print();
 
 	return 0;
 }

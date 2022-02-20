@@ -16,8 +16,6 @@ void Parser::parse(TokenNode& root)
 	{
 		// Will also increment the token
 		this->program.statements.push_back(parse_statement(root));
-		
-		this->program.statements[this->program.statements.size() - 1]->print(); // TODO: remove (here because we're yet to actually compile)
 	}
 }
 
