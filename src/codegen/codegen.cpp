@@ -1,9 +1,16 @@
 #include "codegen.hpp"
 
-Codegen::Codegen(Parser* parser, string output_file)
+Codegen::Codegen(Parser* parser)
 {
 	this->parser = parser;
-	this->output_file = output_file;
+
+	prolog = "\
+	section .text\n\
+	global _start\n\
+	_start:\n\
+	jmp main\n";
+	data = "section .data\n";
+	bss = "section .bss\n";
 }
 
 void Codegen::generate()
@@ -11,12 +18,11 @@ void Codegen::generate()
 
 }
 
-string Codegen::assemble_parts() const
+string Codegen::tostr() const
 {
 	// TODO: Implement
 	string str;
 	str.append(prolog);
-	str.append(epilog);
 	str.append(data);
 	str.append(bss);
 	return str;
@@ -24,16 +30,6 @@ string Codegen::assemble_parts() const
 
 // Nodes codegen polymorphic function
 
-void Nodes::RootStatement::codegen(Codegen& codegen) const
-{
-	codegen.prolog ="\
-	section .text\n\
-	global _start\n\
-	_start:\n\
-	jmp main\n";
-}
+void Nodes::RootStatement::codegen(Codegen& codegen) const {}
 
-void Nodes::EofStatement::codegen(Codegen& codegen) const
-{
-
-}
+void Nodes::EofStatement::codegen(Codegen& codegen) const {}

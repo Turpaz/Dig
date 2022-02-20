@@ -63,7 +63,7 @@ int main(int argc, char** argv)
 
 	Lexer lexer(src, path);
 	Parser parser(&lexer);
-	Codegen codegen(&parser, output_file);
+	Codegen codegen(&parser);
 
 	TokenNode* root = new TokenNode();
 	Token tok;
@@ -82,6 +82,8 @@ int main(int argc, char** argv)
 	codegen.generate();
 
 	codegen.print();
+
+	// TODO: write to output_file
 
 	return 0;
 }

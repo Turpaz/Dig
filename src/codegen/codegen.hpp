@@ -10,24 +10,22 @@ using std::string;
 class Codegen
 {
 private:
-	string output_file;
 	Parser* parser;
 public:
 	string prolog;
-	string epilog;
 	string data;
 	string bss;
 public:
-	Codegen(Parser* parser, string output_file);
+	Codegen(Parser* parser);
 	~Codegen() {}
 
 	void generate();
 
-	string assemble_parts() const;
+	string tostr() const;
 
 	inline void print() const
 	{
-		printf("%s", assemble_parts().c_str());
+		printf("%s", tostr().c_str());
 	}
 };
 
